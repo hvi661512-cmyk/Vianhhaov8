@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080d1b">
+<meta name="color-scheme" content="dark">
+<title>Hào Toán RPG</title>
+<style>
+:root{
+--bg:#080d1b;--glow:#173457;--text:#f4f7ff;
+--muted:#9aa9c5;--cyan:#48d8ff;--green:#38e69a;
+--red:#ff6078;--yellow:#ffd45e;--purple:#b58aff;
+--line:#304363
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+margin:0;min-height:100vh;padding:12px 12px 30px;
+background:radial-gradient(circle at 50% 0%,var(--glow),var(--bg) 55%);
+background-color:var(--bg);
+color:var(--text);font-family:system-ui,Arial,sans-serif;
+display:flex;justify-content:center
+}
+body::before{
+content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;opacity:.22;
+background-image:
+radial-gradient(2px 2px at 20px 30px,#fff,transparent),
+radial-gradient(2px 2px at 80px 120px,#48d8ff,transparent),
+radial-gradient(2px 2px at 150px 70px,#fff,transparent);
+background-size:200px 180px
+}
+button,input,textarea{font:inherit}
+button{cursor:pointer;color:inherit;touch-action:manipulation}
+button:active{transform:scale(.97)}
+.app{width:min(100%,480px)}
+.top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.brand{font-size:19px;font-weight:950}
+.brand span{color:var(--cyan)}
+.pills{display:flex;gap:5px}
+.pill{background:#172641;border:1px solid #304363;padding:6px 8px;border-radius:30px;font-size:12px;font-weight:900;color:var(--yellow)}
+.screen{display:none}
+.screen.active{display:block;animation:screenEnter .2s ease}
+@keyframes screenEnter{from{opacity:0}to{opacity:1}}
+.hero{text-align:center;padding:12px 0}
+.hero h1{margin:7px 0;font-size:27px}
+.eyebrow{color:var(--purple);font-size:12px;font-weight:900;letter-spacing:2px}
+.sub{color:var(--muted);font-size:13px}
+.panel{background:linear-gradient(145deg,#182640,#101a2e);border:1px solid var(--line);border-radius:19px;padding:17px;margin:12px 0}
+.section-title{font-size:13px;font-weight:900;color:var(--muted);letter-spacing:1px;margin-bottom:12px}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{background:#111d33;border:1px solid #344a69;border-radius:14px;padding:14px 10px;text-align:left;min-height:112px;width:100%}
+.mode strong{display:block;font-size:16px}
+.mode small{display:block;color:var(--muted);font-size:11px;margin-top:5px}
+.mode .record{color:var(--yellow);font-size:12px;font-weight:900;padding-top:5px;border-top:1px solid #344a69;margin-top:8px}
+.mode.easy{border-left:4px solid var(--green)}
+.mode.medium{border-left:4px solid var(--cyan)}
+.mode.hard{border-left:4px solid var(--red)}
+.mode.survival{border-left:4px solid var(--purple)}
+.mode.rush{border-left:4px solid var(--yellow);grid-column:1/-1;min-height:0}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.btn{border:1px solid #385477;background:#1b2c49;border-radius:12px;padding:12px 9px;font-weight:850}
+.primary{background:linear-gradient(110deg,#087fa9,#3856b7);border:0}
+.purple{background:#392b5e;border-color:#7056a4}
+.danger{background:#512638;border-color:#8e4057}
+.gold{background:#594516;border-color:#a98531}
+.admin-access{background:linear-gradient(110deg,#76520c,#b17b19);border:1px solid #ffdf72;color:#fff4c2}
+.hint{text-align:center;color:var(--muted);font-size:12px;margin:14px 0}
+.game-head{display:flex;gap:8px}
+.game-stat{flex:1;background:#14223b;border:1px solid #2d4262;border-radius:12px;padding:6px 5px;text-align:center}
+.game-stat small{display:block;color:var(--muted);font-size:10px}
+.game-stat b{font-size:17px}
+.progress{height:10px;background:#293750;border-radius:20px;overflow:hidden;margin:10px 0}
+.progress i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--green),var(--yellow))}
+#timerBar,#duelBar{width:100%;transform-origin:left center;will-change:transform}
+.question{padding:12px;margin:8px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.equation{font-size:clamp(26px,7vw,38px);font-weight:950;margin:6px 0;overflow-wrap:anywhere;line-height:1.2}
+.eq-result{color:var(--cyan)}
+.boss{color:var(--red);font-weight:900;font-size:12px}
+.boss-meter{width:100%;margin:6px 0 2px;padding:7px 9px;border-radius:12px;background:#35182a;border:1px solid #a83d60}
+.boss-meter-top{display:flex;justify-content:space-between;font-size:11px;font-weight:900}
+.boss-health{height:9px;background:#241525;border-radius:20px;overflow:hidden;margin-top:6px}
+.boss-health i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff405f,#ffb15e);transform-origin:left center;transition:transform .3s}
+.boss-meter.enraged{border-color:#ff2a4a;background:#4a1020;animation:rageGlow .7s ease-in-out infinite alternate}
+.boss-meter.enraged .boss-health i{background:linear-gradient(90deg,#ff1c3d,#ff6a3d)}
+@keyframes rageGlow{from{box-shadow:0 0 4px #ff2a4a55}to{box-shadow:0 0 18px #ff2a4acc}}
+.boss-skill{font-size:10px;color:#ffb3c0;margin-top:5px;text-align:center}
+.shake{animation:shakeScreen .45s ease}
+@keyframes shakeScreen{0%,100%{transform:translate(0,0)}15%{transform:translate(-7px,3px)}30%{transform:translate(6px,-4px)}45%{transform:translate(-5px,-3px)}60%{transform:translate(5px,4px)}75%{transform:translate(-3px,2px)}}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.answer{height:84px;border-radius:17px;font-size:24px;font-weight:950;border:2px solid}
+.answer span{display:block;font-size:15px}
+.answer:disabled{opacity:.35;cursor:not-allowed}
+.yes{background:#103d35;border-color:#2bd99a;color:#57f0b2}
+.no{background:#48202f;border-color:#f45d78;color:#ff8295}
+.hint-glow{outline:4px solid var(--yellow);outline-offset:2px}
+.feedback{text-align:center;min-height:24px;margin:6px 0;font-weight:900;font-size:14px}
+.game-bottom{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;margin-top:4px}
+.back{background:none;border:0;color:var(--cyan);font-weight:900;padding:10px 0}
+.result{text-align:center;padding:25px 10px}
+.result-score{font-size:65px;color:var(--cyan);font-weight:950}
+.result-grid,.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:17px 0}
+.result-grid div,.stats-grid div{background:#101b30;border:1px solid var(--line);border-radius:12px;padding:13px}
+.result-grid small,.stats-grid small{display:block;color:var(--muted)}
+.result-grid b,.stats-grid b{font-size:21px}
+.tabs{display:flex;gap:5px;margin:12px 0;flex-wrap:wrap}
+.tab{flex:1;min-width:70px;padding:10px 4px;font-size:11px;font-weight:900;border:1px solid #304363;border-radius:10px;background:#111d33;color:var(--muted)}
+.tab.active{background:#243b60;color:white;border-color:var(--cyan)}
+.profile-top{display:flex;align-items:center;gap:13px}
+.avatar{width:65px;height:65px;border-radius:17px;display:grid;place-items:center;font-size:35px;background:linear-gradient(145deg,#146a8e,#5743a2)}
+.xpbar{height:9px;background:#293750;border-radius:20px;overflow:hidden;margin-top:8px}
+.xpbar i{display:block;height:100%;background:var(--cyan);width:0}
+.level-badge{display:inline-block;margin-top:7px;padding:6px 10px;border-radius:9px;background:#253b5c;color:var(--yellow);font-size:12px;font-weight:950;border:1px solid #52698e}
+.level-progress-text{font-size:11px;color:var(--muted);margin-top:5px}
+.statline{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:12px 0;font-size:13px}
+.shop-item,.achievement,.rank-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #304363}
+.shop-item small,.achievement small{display:block;color:var(--muted);font-size:11px}
+.shop-item button{background:#263c5e;border-radius:9px;padding:8px 11px;font-weight:850;border:1px solid #405777}
+.shop-item button:disabled{opacity:.4;cursor:not-allowed}
+.admin-panel{border:1px solid var(--yellow);background:linear-gradient(145deg,#382e18,#171d30);border-radius:17px;padding:15px}
+.admin-title{font-size:23px;color:var(--yellow);font-weight:950}
+.admin-label{font-size:13px;color:#bdc9df;font-weight:800}
+.admin-input{width:100%;padding:11px;margin:6px 0 12px;background:#0c1629;border:1px solid #536789;border-radius:9px;color:white}
+textarea.admin-input{height:110px;font-size:11px;font-family:monospace;resize:vertical;word-break:break-all}
+.admin-badge{display:inline-block;padding:6px 10px;background:#6c5015;border-radius:8px;color:#ffe28a;font-weight:900;margin:10px 0}
+.quest{background:#111d33;border:1px solid #6b5a34;border-radius:14px;padding:14px;margin:12px 0}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1b3150;border:1px solid var(--cyan);padding:11px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90%;text-align:center}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:#000a;display:none;place-items:center;padding:20px;z-index:30}
+.modal.show{display:grid}
+.modal-box{width:min(100%,350px);padding:20px;background:#17243c;border:1px solid #52698e;border-radius:18px;text-align:center}
+.modal-box p{color:var(--muted)}
+.auth-box{margin-top:25px}
+.auth-box input{font-size:15px}
+.auth-box button{min-height:46px}
+.auth-switch{display:block;width:100%;margin-top:10px;background:none;border:0;color:var(--cyan);padding:10px}
+.auth-note{font-size:11px;color:var(--muted);text-align:center}
+.boss-card{background:linear-gradient(145deg,#421d32,#1c1930);border:1px solid #a83d60;border-radius:15px;padding:13px;margin:12px 0}
+.rank-number{font-size:20px;font-weight:950;color:var(--yellow);width:35px}
+.rank-name{flex:1;min-width:0}
+.rank-name small{display:block;color:var(--muted);font-size:11px}
+.chest-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chest{background:#111d33;border:1px solid #405777;border-radius:13px;padding:14px 8px;text-align:center}
+.chest strong{display:block;font-size:17px}
+.chest small{color:var(--muted)}
+.chest button{width:100%;margin-top:9px}
+.pw-row{display:flex;align-items:center;gap:8px}
+.pw-row code{background:#0c1629;border:1px solid #536789;border-radius:8px;padding:7px 10px;font-size:14px;word-break:break-all}
+.pw-row button{background:#263c5e;border:1px solid #405777;border-radius:8px;padding:7px 10px}
+.correct-pop{animation:correctPop .3s ease}
+@keyframes correctPop{0%{transform:scale(1)}45%{transform:scale(1.07)}100%{transform:scale(1)}}
+.wrong-pop{animation:wrongPop .3s ease}
+@keyframes wrongPop{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#fx{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:20;transition:opacity .3s ease-out}
+#fx.on{opacity:1;transition:none}
+#fx[data-t=correct]{background:#38e69a22}
+#fx[data-t=wrong]{background:#ff607833}
+#fx[data-t=level]{background:#ffd45e33}
+@media(hover:hover){.mode:hover,.btn:hover,.answer:hover{filter:brightness(1.15)}}
+body.ocean{--bg:#041a2b;--glow:#0d5a7a}
+body.sunset{--bg:#24101d;--glow:#7a2e4a}
+body.purple{--bg:#1b1030;--glow:#4a2a85}
+.skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.skill-btn{background:#202d4c;border:1px solid #526b99;border-radius:12px;padding:8px 6px;font-size:12px;font-weight:900;min-height:56px}
+.skill-btn:disabled{opacity:.4;cursor:not-allowed}
+.skill-btn small{display:block;color:#b9c8e0;font-size:10px;margin-top:3px}
+.skill-panel{padding:12px}
+.energy-line{display:flex;justify-content:space-between;font-size:12px;font-weight:900}
+.energy-bar{height:8px;background:#26344e;border-radius:20px;overflow:hidden;margin-top:6px}
+.energy-bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#a46cff,#48d8ff);transform-origin:left center;transform:scaleX(0);transition:transform .2s}
+.event-banner{display:none;text-align:center;padding:7px;border-radius:12px;margin:6px 0;font-weight:950;font-size:12px;border:1px solid var(--yellow);background:#514017;color:#ffe58a}
+.event-banner.show{display:block}
+.equipment-mini{font-size:11px;color:var(--cyan);text-align:center;margin:8px 0 0}
+.footer{text-align:center;color:#667895;font-size:10px;margin:25px 0}
+/* ĐỐI KHÁNG */
+.duel-wrap{position:relative;display:flex;flex-direction:column;gap:8px}
+.duel-side{padding:10px;border:1px solid var(--line);border-radius:16px;background:#111d33}
+.duel-side.p2{transform:rotate(180deg)}
+.duel-side .answer{height:64px;font-size:20px}
+.duel-side .answer span{font-size:13px}
+.duel-side .equation{font-size:clamp(24px,7vw,34px);text-align:center}
+.duel-head{display:flex;justify-content:space-between;font-size:13px;font-weight:900;color:var(--yellow)}
+.duel-msg{text-align:center;min-height:20px;font-size:13px;font-weight:900}
+.duel-mid{text-align:center}
+.duel-result{position:absolute;inset:0;background:#000d;border-radius:16px;display:grid;place-content:center;gap:12px;text-align:center;padding:20px;z-index:5}
+.duel-result h2{margin:0;font-size:26px;color:var(--yellow)}
+[hidden]{display:none!important}
+@media(max-width:350px){.mode-grid{grid-template-columns:1fr}.game-stat b{font-size:15px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="top">
+<div class="brand">HÀO TOÁN <span>⚡ RPG</span></div>
+<div class="pills">
+<button class="pill" id="soundBtn" aria-label="Bật hoặc tắt âm thanh">🔊</button>
+<button class="pill" id="vibeBtn" aria-label="Bật hoặc tắt rung">📳</button>
+<div class="pill" id="levelPill">CẤP 1</div>
+<div class="pill" id="coinPill">🪙 0</div>
+</div>
+</header>
+
+<!-- ĐĂNG NHẬP -->
+<section id="auth" class="screen active">
+<div class="hero">
+<div class="eyebrow">MATH QUEST V8.1</div>
+<h1>⚡ Hào Toán RPG</h1>
+<div class="sub">Chinh phục thử thách toán học!</div>
+</div>
+<div class="panel auth-box" id="authMenu">
+<div class="section-title">CHÀO MỪNG ĐẾN VỚI HÀO TOÁN RPG</div>
+<button class="btn primary" id="showLogin" style="width:100%">🔑 ĐĂNG NHẬP</button>
+<button class="btn purple" id="showRegister" style="width:100%;margin-top:9px">📝 ĐĂNG KÝ</button>
+<button class="btn" id="guestBtn" style="width:100%;margin-top:9px">👤 CHƠI NHƯ KHÁCH</button>
+<p class="hint">Đăng ký không giới hạn tài khoản.</p>
+</div>
+<div class="panel auth-box" id="loginForm" hidden>
+<div class="section-title">🔑 ĐĂNG NHẬP</div>
+<input class="admin-input" id="loginUser" maxlength="20" placeholder="Tên tài khoản" autocomplete="username">
+<input class="admin-input" id="loginPass" type="password" maxlength="100" placeholder="Mật khẩu" autocomplete="current-password">
+<button class="btn primary" id="loginBtn" style="width:100%">XÁC NHẬN ĐĂNG NHẬP</button>
+<button class="auth-switch" data-auth-back>← Quay lại</button>
+</div>
+<div class="panel auth-box" id="registerForm" hidden>
+<div class="section-title">📝 TẠO TÀI KHOẢN</div>
+<input class="admin-input" id="registerUser" maxlength="20" placeholder="Tên tài khoản (3-20 ký tự)" autocomplete="username">
+<input class="admin-input" id="registerPass" type="password" maxlength="100" placeholder="Mật khẩu (ít nhất 6 ký tự)" autocomplete="new-password">
+<input class="admin-input" id="registerPass2" type="password" maxlength="100" placeholder="Nhập lại mật khẩu" autocomplete="new-password">
+<button class="btn primary" id="confirmRegister" style="width:100%">✓ XÁC NHẬN ĐĂNG KÝ</button>
+<button class="auth-switch" data-auth-back>← Quay lại</button>
+<p class="auth-note">Không giới hạn số lượng tài khoản đăng ký.</p>
+</div>
+</section>
+
+<!-- MENU -->
+<section id="home" class="screen">
+<div class="hero">
+<div class="eyebrow">MATH QUEST V8.1</div>
+<h1>Chinh phục thử thách!</h1>
+<div class="sub">Tính nhanh · Lên cấp · Hạ Boss</div>
+<div class="sub" id="accountLabel"></div>
+</div>
+<div class="panel">
+<div class="section-title">CHỌN CHẾ ĐỘ</div>
+<div class="mode-grid">
+<button class="mode easy" data-mode="easy"><strong>🌱 Dễ</strong><small>4 giây/câu · +1 điểm</small><small class="record">🏆 Kỷ lục: <b id="recordEasy">0</b></small></button>
+<button class="mode medium" data-mode="medium"><strong>⚡ Vừa</strong><small>3 giây/câu · +2 điểm</small><small class="record">🏆 Kỷ lục: <b id="recordMedium">0</b></small></button>
+<button class="mode hard" data-mode="hard"><strong>🔥 Khó</strong><small>2 giây/câu · +5 điểm</small><small class="record">🏆 Kỷ lục: <b id="recordHard">0</b></small></button>
+<button class="mode survival" data-mode="survival"><strong>💀 Sinh tồn</strong><small>Tăng tốc · Tăng độ khó · Hệ số đến x10</small><small class="record">🏆 Kỷ lục: <b id="recordSurvival">0</b></small></button>
+<button class="mode rush" data-mode="rush"><strong>👹 Boss Rush</strong><small>Boss liên tục · +3 điểm/câu · +50 điểm/Boss · sai 1 câu là thua</small><small class="record">🏆 Kỷ lục: <b id="recordRush">0</b></small></button>
+</div>
+<div class="actions">
+<button class="btn" id="practiceBtn">📚 Luyện tập</button>
+<button class="btn" id="duelBtn">⚔️ Đối kháng 2 người</button>
+</div>
+<div class="actions">
+<button class="btn" id="statsBtn">📊 Thống kê</button>
+<button class="btn purple" id="rpgBtn">🛡️ Hồ sơ RPG</button>
+<button class="btn gold" id="leaderboardBtn">🏆 Xếp hạng</button>
+<button class="btn" id="dailyBtn">📅 Nhiệm vụ ngày</button>
+<button class="btn purple" id="skillTreeBtn">🌳 Cây kỹ năng</button>
+<button class="btn" id="backupBtn">💾 Sao lưu</button>
+</div>
+<button class="btn admin-access" id="adminAccessBtn" style="width:100%;margin-top:12px">👑 QUYỀN ADMIN</button>
+</div>
+<div class="quest">
+<div class="section-title">👑 NHIỆM VỤ ADMIN</div>
+<b>Đạt kỷ lục 100.000 điểm trong một trận chế độ KHÓ</b>
+<p class="sub">Phần thưởng: 100.000.000 xu và mở khóa ADMIN.</p>
+<div class="progress"><i id="adminProgress"></i></div>
+<div class="sub" id="adminQuestText">Kỷ lục Khó: 0 / 100.000</div>
+</div>
+<div class="hint">Chọn ĐÚNG nếu phép tính chính xác, chọn SAI nếu không chính xác.<br>Khi đánh Boss: <b>sai 1 câu là thua</b> (khiên sẽ cứu bạn).<br>Phím tắt: <b>A</b> / ← = ĐÚNG · <b>D</b> / → = SAI</div>
+<button class="btn danger" id="resetBtn" style="width:100%">Đặt lại toàn bộ dữ liệu</button>
+<button class="btn" id="logoutBtn" style="width:100%;margin-top:9px">🚪 Đăng xuất / Đổi tài khoản</button>
+</section>
+
+<!-- TRẬN ĐẤU -->
+<section id="game" class="screen">
+<div class="game-head">
+<div class="game-stat"><small>ĐIỂM</small><b id="score">0</b></div>
+<div class="game-stat"><small>CÂU ĐÚNG</small><b id="streak">0</b></div>
+<div class="game-stat"><small>CẤP TRẬN</small><b id="gameLevel">1</b></div>
+</div>
+<div class="progress" id="timerWrap"><i id="timerBar"></i></div>
+<div class="event-banner" id="eventBanner"></div>
+
+<div class="panel question">
+<div class="sub" id="modeLabel">CHẾ ĐỘ DỄ</div>
+<div class="boss" id="bossLabel"></div>
+<div class="boss-meter" id="bossMeter" hidden>
+<div class="boss-meter-top"><span id="bossName">👹 BOSS</span><b id="bossHPText">1000 / 1000 HP</b></div>
+<div class="boss-health"><i id="bossHPBar"></i></div>
+<div class="boss-skill" id="bossSkillText"></div>
+</div>
+<div class="equation">
+<span id="expression">8 + 4</span>
+<span class="eq-result"> = <span id="shownResult">12</span></span>
+</div>
+<div class="sub">Kết quả này đúng hay sai?</div>
+</div>
+
+<div class="answers">
+<button class="answer yes" id="yesBtn" aria-label="Đúng (phím A hoặc mũi tên trái)">✓<span>ĐÚNG</span></button>
+<button class="answer no" id="noBtn" aria-label="Sai (phím D hoặc mũi tên phải)">✕<span>SAI</span></button>
+</div>
+<div class="feedback" id="feedback" aria-live="assertive"></div>
+<button class="btn primary" id="nextBtn" hidden style="width:100%;margin:0 0 8px">Câu tiếp theo ▶</button>
+
+<div class="panel skill-panel" id="skillPanel">
+<div class="energy-line"><span>⚡ NĂNG LƯỢNG</span><b id="energyText">0 / 100</b></div>
+<div class="energy-bar"><i id="energyBar"></i></div>
+<div class="skill-grid">
+<button class="skill-btn" id="skillReroll">🔄 ĐỔI CÂU<small>Câu mới + đủ giờ · 15 NL</small></button>
+<button class="skill-btn" id="skillCritical">💥 CRITICAL HIT<small>Nhân đôi điểm · 25 NL</small></button>
+<button class="skill-btn" id="skillShield">🛡️ HỘ MỆNH<small>+1 khiên (tối đa 5) · 35 NL</small></button>
+<button class="skill-btn" id="skillSkip">✨ VƯỢT THỬ THÁCH<small>Bỏ qua câu · 40 NL</small></button>
+<button class="skill-btn" id="skillHint" hidden>💡 GỢI Ý<small>Sáng đáp án đúng · 20 NL</small></button>
+<button class="skill-btn" id="skillBurst" hidden>🔥 BÙNG NỔ<small>Boss -300 HP · 45 NL</small></button>
+</div>
+<div class="equipment-mini" id="equipmentMini">Trang bị: Chưa có</div>
+</div>
+
+<div class="game-bottom">
+<span id="rightCount">Đúng: 0 · 🛡️0</span>
+<button class="back" id="quitBtn">Thoát trận ×</button>
+<span id="timeLabel">4.0s</span>
+</div>
+</section>
+
+<!-- ĐỐI KHÁNG 2 NGƯỜI -->
+<section id="duel" class="screen">
+<div class="duel-wrap">
+<div class="duel-side p2">
+<div class="duel-head"><span>NGƯỜI 2 (phím K / L)</span><span>🏆 <b id="duelS2">0</b> / 10</span></div>
+<div class="equation"><span class="dq-expr">8 + 4</span> <span class="eq-result">= <span class="dq-res">12</span></span></div>
+<div class="answers">
+<button class="answer yes" id="d2yes">✓<span>ĐÚNG</span></button>
+<button class="answer no" id="d2no">✕<span>SAI</span></button>
+</div>
+<div class="duel-msg" id="duelMsg2"></div>
+</div>
+
+<div class="duel-mid">
+<div class="progress"><i id="duelBar"></i></div>
+<button class="back" id="duelQuit">Thoát đối kháng ×</button>
+</div>
+
+<div class="duel-side p1">
+<div class="duel-head"><span>NGƯỜI 1 (phím A / S)</span><span>🏆 <b id="duelS1">0</b> / 10</span></div>
+<div class="equation"><span class="dq-expr">8 + 4</span> <span class="eq-result">= <span class="dq-res">12</span></span></div>
+<div class="answers">
+<button class="answer yes" id="d1yes">✓<span>ĐÚNG</span></button>
+<button class="answer no" id="d1no">✕<span>SAI</span></button>
+</div>
+<div class="duel-msg" id="duelMsg1"></div>
+</div>
+
+<div class="duel-result" id="duelResult" hidden>
+<h2 id="duelWinner">NGƯỜI 1 THẮNG!</h2>
+<div class="sub" id="duelFinal">10 - 7</div>
+<div class="actions">
+<button class="btn primary" id="duelAgain">Chơi lại</button>
+<button class="btn" id="duelHome">Về menu</button>
+</div>
+</div>
+</div>
+<p class="hint">Luật: cùng một câu hỏi, ai trả lời ĐÚNG trước được +1 điểm. Trả lời sai thì bị khóa câu đó. Hết 5 giây không ai đúng thì qua câu mới. Ai đạt 10 điểm trước thắng.</p>
+</section>
+
+<!-- KẾT THÚC -->
+<section id="over" class="screen">
+<div class="panel result">
+<div class="eyebrow">KẾT THÚC THỬ THÁCH</div>
+<h2 id="resultTitle">Tuyệt vời!</h2>
+<div class="result-score" id="finalScore">0</div>
+<div class="sub">ĐIỂM SỐ</div>
+<div class="sub" id="finalMode"></div>
+<div class="result-grid">
+<div><small>Câu đúng</small><b id="finalRight">0</b></div>
+<div><small>Câu sai</small><b id="finalWrong">0</b></div>
+<div><small>Chính xác</small><b id="finalAccuracy">0%</b></div>
+<div><small>Thời gian/câu</small><b id="finalAvgTime">0s</b></div>
+<div><small>Boss hạ</small><b id="finalBosses">0</b></div>
+<div><small>Khiên còn lại</small><b id="finalShield">0</b></div>
+</div>
+<div id="newRecord" style="color:var(--yellow);font-weight:900"></div>
+<div id="adminResult" style="color:var(--yellow);font-weight:900;margin:10px"></div>
+<div class="actions">
+<button class="btn primary" id="againBtn">Chơi lại</button>
+<button class="btn" id="homeBtn">Về menu</button>
+</div>
+</div>
+</section>
+
+<!-- THỐNG KÊ -->
+<section id="stats" class="screen">
+<button class="back" data-home>‹ MENU</button>
+<div class="hero"><h1>📊 Thống kê</h1></div>
+<div class="panel">
+<div class="stats-grid">
+<div><small>Số trận</small><b id="statGames">0</b></div>
+<div><small>Câu đúng</small><b id="statRight">0</b></div>
+<div><small>Câu sai</small><b id="statWrong">0</b></div>
+<div><small>Chính xác</small><b id="statAccuracy">0%</b></div>
+<div><small>XP</small><b id="statXP">0</b></div>
+<div><small>Kỷ lục Sinh tồn</small><b id="statSurvival">0</b></div>
+<div><small>Kỷ lục Boss Rush</small><b id="statRush">0</b></div>
+</div>
+</div>
+</section>
+
+<!-- NHIỆM VỤ NGÀY -->
+<section id="daily" class="screen">
+<button class="back" data-home>‹ MENU</button>
+<div class="hero"><h1>📅 Nhiệm vụ hằng ngày</h1></div>
+<div class="panel">
+<div class="section-title">🎁 QUÀ ĐĂNG NHẬP</div>
+<div class="statline"><span>Chuỗi đăng nhập</span><b id="loginStreakText">0 ngày</b></div>
+<p class="sub" id="loginGiftText"></p>
+</div>
+<div class="panel">
+<div class="section-title">NHIỆM VỤ 1 · LUYỆN TẬP</div>
+<b>Trả lời đúng 20 câu hỏi</b>
+<div class="progress"><i id="dailyProgress"></i></div>
+<div class="statline"><span>Tiến độ</span><b id="dailyProgressText">0 / 20</b></div>
+<div class="statline"><span>Phần thưởng</span><b>50 xu + XP</b></div>
+<div id="dailyStatus" class="sub"></div>
+</div>
+<div class="panel">
+<div class="section-title">NHIỆM VỤ 2 · SĂN BOSS</div>
+<b>Hạ 1 Boss trong hôm nay</b>
+<div class="progress"><i id="dailyBossBar"></i></div>
+<div class="statline"><span>Tiến độ</span><b id="dailyBossText">0 / 1</b></div>
+<div class="statline"><span>Phần thưởng</span><b>🎁 Rương 150–700 xu</b></div>
+<div id="dailyBossStatus" class="sub"></div>
+</div>
+<div class="panel">
+<div class="section-title">NHIỆM VỤ 3 · ĐIỂM CAO</div>
+<b>Đạt 50 điểm trong một trận</b>
+<div class="progress"><i id="dailyScoreBar"></i></div>
+<div class="statline"><span>Tiến độ</span><b id="dailyScoreText">0 / 50</b></div>
+<div class="statline"><span>Phần thưởng</span><b>🎁 Rương 150–700 xu</b></div>
+<div id="dailyScoreStatus" class="sub"></div>
+</div>
+<div class="panel">
+<div class="section-title">🔥 CHUỖI NGÀY</div>
+<h2 id="dailyStreakBig">0 ngày</h2>
+<p class="sub">Hoàn thành nhiệm vụ 1 mỗi ngày để duy trì chuỗi. Khách không nhận thưởng nhiệm vụ.</p>
+</div>
+</section>
+
+<!-- XẾP HẠNG -->
+<section id="leaderboard" class="screen">
+<button class="back" data-home>‹ MENU</button>
+<div class="hero"><h1>🏆 Bảng xếp hạng</h1></div>
+<div class="panel">
+<div class="section-title">TOP KỶ LỤC CHẾ ĐỘ KHÓ</div>
+<div id="leaderboardList"></div>
+<p class="hint">Xếp hạng tài khoản được lưu trên thiết bị này.</p>
+</div>
+<div class="panel">
+<div class="section-title">KỶ LỤC CỦA BẠN</div>
+<div class="statline"><span>Điểm Khó cao nhất</span><b id="myHardRecord">0</b></div>
+<div class="statline"><span>XP</span><b id="myXP">0</b></div>
+<div class="statline"><span>Xu</span><b id="myCoins">0</b></div>
+</div>
+</section>
+
+<!-- SAO LƯU -->
+<section id="backup" class="screen">
+<button class="back" data-home>‹ MENU</button>
+<div class="hero"><h1>💾 Sao lưu dữ liệu</h1></div>
+<div class="panel">
+<div class="section-title">XUẤT MÃ SAO LƯU</div>
+<p class="sub">Tạo mã chứa toàn bộ tiến trình hiện tại (xu, XP, trang bị, kỷ lục...). Hãy lưu mã vào ghi chú để dùng khi đổi máy hoặc lỡ xóa dữ liệu trình duyệt.</p>
+<button class="btn primary" id="exportBtn" style="width:100%">🔐 Tạo mã sao lưu</button>
+<textarea class="admin-input" id="exportBox" readonly placeholder="Mã sao lưu sẽ hiện ở đây..." style="margin-top:12px"></textarea>
+<button class="btn gold" id="copyBtn" style="width:100%">📋 Sao chép mã</button>
+</div>
+<div class="panel">
+<div class="section-title">NHẬP MÃ SAO LƯU</div>
+<p class="sub">Dán mã vào đây. Dữ liệu của tài khoản (hoặc khách) đang dùng sẽ bị <b>thay thế</b> bằng dữ liệu trong mã.</p>
+<textarea class="admin-input" id="importBox" placeholder="Dán mã bắt đầu bằng HTR1: ..."></textarea>
+<button class="btn purple" id="importBtn" style="width:100%">📥 Nhập dữ liệu</button>
+<p class="hint">Mã không chứa mật khẩu tài khoản. Để chuyển sang máy mới: đăng ký (hoặc chơi khách) trên máy đó rồi nhập mã.</p>
+</div>
+</section>
+
+<!-- HỒ SƠ RPG -->
+<section id="rpg" class="screen">
+<button class="back" data-home>‹ MENU</button>
+<div class="hero"><h1>🛡️ Hồ sơ nhân vật</h1></div>
+<div class="tabs">
+<button class="tab active" data-tab="profile">Nhân vật</button>
+<button class="tab" data-tab="account">🔐 Tài khoản</button>
+<button class="tab" data-tab="skills">🌳 Kỹ năng</button>
+<button class="tab" data-tab="shop">Cửa hàng</button>
+<button class="tab" data-tab="equipment">Trang bị</button>
+<button class="tab" data-tab="chests">Rương</button>
+<button class="tab" data-tab="bosses">Boss</button>
+<button class="tab" data-tab="achievements">Thành tích</button>
+<button class="tab" data-tab="admin">👑 ADMIN</button>
+</div>
+
+<div class="panel" id="profilePage">
+<div class="profile-top">
+<div class="avatar" id="avatarDisplay">🧙</div>
+<div style="flex:1">
+<b id="rpgLevel">CẤP 1</b>
+<div class="level-badge" id="levelRankDisplay">🏅 Tân Binh</div>
+<div class="sub" id="titleDisplay">Danh hiệu trang bị: Tân binh</div>
+<div class="sub" id="xpText">0 / 100 XP</div>
+<div class="xpbar"><i id="xpBar"></i></div>
+<div class="level-progress-text" id="nextLevelText">Còn 100 XP để lên cấp tiếp theo</div>
+</div>
+</div>
+<div class="statline"><span>🪙 Xu</span><b id="rpgCoins">0</b></div>
+<div class="statline"><span>📅 Nhiệm vụ ngày</span><b id="dailyText">0 / 20</b></div>
+<div class="statline"><span>🔥 Chuỗi ngày</span><b id="dailyStreak">0</b></div>
+<div class="statline"><span>🎁 Chuỗi đăng nhập</span><b id="loginStreakProfile">0 ngày</b></div>
+<div class="statline"><span>👹 Boss đã hạ</span><b id="bossesDefeated">0</b></div>
+<div class="statline"><span>🎁 Rương đã mở</span><b id="chestsOpened">0</b></div>
+<div class="statline"><span>⚔️ Trang bị đang dùng</span><b id="equippedCount">0 / 5</b></div>
+<div class="section-title">CHỌN DANH HIỆU</div>
+<div id="titleList"></div>
+</div>
+
+<div class="panel" id="accountPage" hidden>
+<div class="section-title">🔐 THÔNG TIN TÀI KHOẢN</div>
+<div id="accountGuest" hidden class="sub">👤 Bạn đang chơi với tư cách khách nên chưa có tài khoản. Hãy đăng ký để lưu tiến trình.</div>
+<div id="accountInfo" hidden>
+<div class="statline"><span>👤 Tên tài khoản</span><b id="accUser">-</b></div>
+<div class="statline"><span>🔑 Mật khẩu</span>
+<div class="pw-row"><code id="accPass">••••••</code><button id="togglePass" aria-label="Hiện hoặc ẩn mật khẩu">👁</button></div>
+</div>
+<p class="sub" id="accNote"></p>
+<p class="hint">Mật khẩu được lưu trên thiết bị này để bạn xem lại. Đừng cho người khác mượn máy khi đang mở tab này.</p>
+</div>
+</div>
+
+<div class="panel" id="skillsPage" hidden>
+<div class="section-title">🌳 CÂY KỸ NĂNG</div>
+<p class="sub">Dùng xu để mở khóa kỹ năng mới và nâng cấp vĩnh viễn. Khách không thể mua.</p>
+<div id="skillTreeList"></div>
+</div>
+
+<div class="panel" id="shopPage" hidden>
+<div class="section-title">CHỦ ĐỀ GIAO DIỆN</div>
+<div id="shopList"></div>
+<div class="section-title" style="margin-top:20px">AVATAR NHÂN VẬT</div>
+<div id="avatarList"></div>
+</div>
+
+<div class="panel" id="equipmentPage" hidden>
+<div class="section-title">⚔️ CỬA HÀNG TRANG BỊ</div>
+<p class="sub">Trang bị giúp nhân vật mạnh hơn trong trận đấu.</p>
+<div id="equipmentShop"></div>
+<div class="section-title" style="margin-top:20px">🎒 TRANG BỊ ĐANG SỬ DỤNG</div>
+<div id="equipmentCurrent"></div>
+</div>
+
+<div class="panel" id="chestsPage" hidden>
+<div class="section-title">🎁 KHO RƯƠNG BÁU</div>
+<div class="chest-grid" id="chestList"></div>
+<p class="hint">Mỗi rương có phần thưởng ngẫu nhiên.</p>
+</div>
+
+<div class="panel" id="bossesPage" hidden>
+<div class="section-title">👹 SỔ BOSS</div>
+<div id="bossList"></div>
+</div>
+
+<div class="panel" id="achievementsPage" hidden>
+<div class="section-title">THÀNH TÍCH</div>
+<div id="achievementList"></div>
+</div>
+
+<div class="admin-panel" id="adminPage" hidden>
+<div class="admin-title">👑 ADMIN CONTROL</div>
+<p class="sub">Điều khiển chỉ số nhân vật.</p>
+<div id="adminLocked">🔒 Hãy nhập mật khẩu Admin ở menu chính để mở khóa.</div>
+<div id="adminControls" hidden>
+<div class="admin-badge">ADMIN ĐÃ KÍCH HOẠT</div>
+<label class="admin-label" for="editCoins">Xu</label><input class="admin-input" id="editCoins" type="number">
+<label class="admin-label" for="editXP">XP</label><input class="admin-input" id="editXP" type="number">
+<label class="admin-label" for="editRight">Tổng câu đúng</label><input class="admin-input" id="editRight" type="number">
+<label class="admin-label" for="editWrong">Tổng câu sai</label><input class="admin-input" id="editWrong" type="number">
+<label class="admin-label" for="editGames">Số trận</label><input class="admin-input" id="editGames" type="number">
+<label class="admin-label" for="editEasy">Kỷ lục Dễ</label><input class="admin-input" id="editEasy" type="number">
+<label class="admin-label" for="editMedium">Kỷ lục Vừa</label><input class="admin-input" id="editMedium" type="number">
+<label class="admin-label" for="editHard">Kỷ lục Khó</label><input class="admin-input" id="editHard" type="number">
+<label class="admin-label" for="editSurvival">Kỷ lục Sinh tồn</label><input class="admin-input" id="editSurvival" type="number">
+<label class="admin-label" for="editRush">Kỷ lục Boss Rush</label><input class="admin-input" id="editRush" type="number">
+<button class="btn primary" id="saveAdmin" style="width:100%">💾 LƯU THAY ĐỔI</button>
+<button class="btn purple" id="maxAdmin" style="width:100%;margin-top:9px">⚡ MAX TOÀN BỘ</button>
+</div>
+</div>
+</section>
+
+<div class="footer">HÀO TOÁN RPG V8.1 · ULTIMATE UPDATE</div>
+</div>
+
+<div id="fx" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+<div class="modal-box">
+<h2 id="modalTitle">Xác nhận</h2>
+<p id="modalText"></p>
+<div class="actions">
+<button class="btn danger" id="modalYes">Xác nhận</button>
+<button class="btn" id="modalNo">Hủy</button>
+</div>
+</div>
+</div>
+
+<div class="modal" id="adminPasswordModal" role="dialog" aria-modal="true">
+<div class="modal-box">
+<h2 style="color:var(--yellow)">👑 QUYỀN ADMIN</h2>
+<p>Nhập mật khẩu để kích hoạt quyền Admin.</p>
+<input class="admin-input" id="adminPasswordInput" type="password" placeholder="Nhập mật khẩu Admin" maxlength="30" autocomplete="off">
+<button class="btn gold" id="confirmAdminPassword" style="width:100%">XÁC NHẬN</button>
+<button class="auth-switch" id="cancelAdminPassword">← Quay lại</button>
+</div>
+</div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const fmt=n=>Number(n).toLocaleString('vi-VN');
+/* Chỉ ghi DOM khi nội dung thật sự đổi (nhẹ cho máy yếu) */
+function setText(el,t){t=String(t);if(el._t!==t){el._t=t;el.textContent=t;}}
+
+const ACCOUNT_KEY='hao_toan_rpg_v7_accounts';
+const DATA_PREFIX='hao_toan_rpg_v7_data_';
+const GUEST_DATA_KEY='hao_toan_rpg_v7_guest_data';
+const SESSION_KEY='hao_toan_rpg_v73_session';
+const SETTINGS_KEY='hao_toan_rpg_v79_settings';
+const ADMIN_PASSWORD='10012016';
+const MAX_SHIELD=5;
+const DUEL_TARGET=10,DUEL_TIME=5;
+
+let currentUser=null,isGuest=true,data=null,dataLoaded=false;
+let mode='easy',score=0,rightGame=0,wrongGame=0,levelGame=1;
+let timeLeft=0,timeLimit=4,question=null;
+let playing=false,locked=false,raf=0;
+let timerDeadline=0,timerToken=0;
+let modalAction=null,toastTimer=null;
+let gameStartedAt=0,passVisible=false;
+let energy=0,bossHP=0,bossMaxHP=1000,shieldCount=0;
+let activeBoss=null,criticalNext=false,hintUsed=false;
+let activeEvent=null,eventTimer=null;
+let matchBossesDefeated=0,rushBossCount=0;
+let lastDraw=0;
+let bossTimeLimit=0,bossHits=0,bossEnraged=false;
+
+const timerBarEl=$('timerBar'),timeLabelEl=$('timeLabel');
+
+/* ========== ÂM THANH + RUNG ========== */
+let sfxOn=true,vibeOn=true,audioCtx=null,master=null;
+function loadSettings(){
+try{const s=JSON.parse(localStorage.getItem(SETTINGS_KEY));if(s){sfxOn=s.sound!==false;vibeOn=s.vibe!==false;}}catch(e){}
+}
+function saveSettings(){
+try{localStorage.setItem(SETTINGS_KEY,JSON.stringify({sound:sfxOn,vibe:vibeOn}));}catch(e){}
+}
+function renderSettings(){
+$('soundBtn').textContent=sfxOn?'🔊':'🔇';
+$('vibeBtn').textContent=vibeOn?'📳':'📴';
+}
+function getAudio(){
+const AC=window.AudioContext||window.webkitAudioContext;
+if(!AC)return null;
+if(!audioCtx){
+audioCtx=new AC();
+master=audioCtx.createGain();
+master.gain.value=.9;
+master.connect(audioCtx.destination);
+}
+return audioCtx;
+}
+function unlockAudio(){
+const c=getAudio();
+if(!c||c.state==='running')return;
+c.resume().catch(()=>{});
+try{
+const b=c.createBuffer(1,1,22050),s=c.createBufferSource();
+s.buffer=b;s.connect(c.destination);s.start(0);
+}catch(e){}
+}
+['pointerdown','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{passive:true}));
+document.addEventListener('visibilitychange',()=>{
+if(!document.hidden&&audioCtx&&audioCtx.state!=='running')audioCtx.resume().catch(()=>{});
+});
+function tone(f,t0,d,type,v){
+const c=audioCtx,o=c.createOscillator(),g=c.createGain(),n=c.currentTime+t0;
+o.type=type||'sine';
+o.frequency.setValueAtTime(f,n);
+g.gain.setValueAtTime(.0001,n);
+g.gain.linearRampToValueAtTime(v||.18,n+.012);
+g.gain.exponentialRampToValueAtTime(.0001,n+d);
+o.connect(g);g.connect(master);
+o.start(n);o.stop(n+d+.02);
+}
+const SFX={
+ok:[[880,0,.12],[1320,.09,.16]],
+bad:[[200,0,.25,'triangle',.22]],
+skill:[[660,0,.1],[990,.08,.14]],
+up:[[523,0,.12],[659,.1,.12],[784,.2,.2]],
+win:[[523,0,.15,'triangle'],[659,.12,.15,'triangle'],[784,.24,.15,'triangle'],[1047,.36,.35,'triangle']],
+boss:[[140,0,.35,'sawtooth',.12],[110,.2,.4,'sawtooth',.12]],
+rage:[[90,0,.3,'sawtooth',.2],[70,.15,.3,'sawtooth',.2],[55,.3,.5,'sawtooth',.2]],
+lose:[[330,0,.2,'triangle'],[262,.18,.2,'triangle'],[196,.36,.4,'triangle']]
+};
+function sfx(name){
+if(!sfxOn)return;
+try{
+const c=getAudio();
+if(!c)return;
+if(c.state!=='running')c.resume().catch(()=>{});
+for(const [f,t,d,ty,v] of SFX[name])tone(f,t,d,ty,v);
+}catch(e){}
+}
+function vibe(p){
+if(vibeOn&&navigator.vibrate){try{navigator.vibrate(p);}catch(e){}}
+}
+
+/* ========== HIỆU ỨNG NHẸ ========== */
+const fxEl=$('fx');let fxTimer=0;
+function triggerEffect(t){
+fxEl.dataset.t=t;
+fxEl.classList.add('on');
+clearTimeout(fxTimer);
+fxTimer=setTimeout(()=>fxEl.classList.remove('on'),90);
+}
+function animateAnswer(correct){
+const button=correct?$('yesBtn'):$('noBtn');
+const name=correct?'correct-pop':'wrong-pop';
+button.classList.remove(name);void button.offsetWidth;
+button.classList.add(name);
+setTimeout(()=>button.classList.remove(name),350);
+triggerEffect(correct?'correct':'wrong');
+}
+function shakeScreen(){
+const g=$('game');
+g.classList.remove('shake');void g.offsetWidth;
+g.classList.add('shake');
+setTimeout(()=>g.classList.remove('shake'),500);
+}
+
+/* ========== CẤP ĐỘ ========== */
+const MAX_LEVEL=100;
+const levelRanks=[
+{level:1,name:'Tân Binh'},{level:10,name:'Học Giả'},{level:20,name:'Trí Tuệ Gia'},
+{level:30,name:'Nhà Toán Học'},{level:40,name:'Bậc Thầy Tính Toán'},{level:50,name:'Đại Pháp Sư Toán Học'},
+{level:60,name:'Chiến Thần Tri Thức'},{level:70,name:'Huyền Thoại Tri Thức'},{level:80,name:'Thần Trí Tuệ'},
+{level:90,name:'Chúa Tể Tri Thức'},{level:100,name:'Đấng Toàn Tri'}
+];
+function getLevelInfo(totalXP){
+let xp=Math.max(0,Number(totalXP)||0),level=1;
+while(level<MAX_LEVEL){
+const required=100+(level-1)*10;
+if(xp<required)return{level,currentXP:xp,requiredXP:required,progress:xp/required*100,max:false};
+xp-=required;level++;
+}
+return{level:MAX_LEVEL,currentXP:0,requiredXP:0,progress:100,max:true};
+}
+function getLevelRank(level){
+let rank=levelRanks[0].name;
+for(const item of levelRanks)if(level>=item.level)rank=item.name;
+return rank;
+}
+function fmtDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function today(){return fmtDate(new Date());}
+function dateBefore(){return fmtDate(new Date(Date.now()-86400000));}
+
+/* ========== DỮ LIỆU ========== */
+function defaults(){
+return{
+records:{easy:0,medium:0,hard:0,survival:0,rush:0},
+adminBestHardScore:0,games:0,right:0,wrong:0,xp:0,coins:0,
+ownedThemes:['neon'],theme:'neon',achievements:[],
+dailyDate:today(),dailyCorrect:0,dailyClaimed:false,
+dailyBoss:0,dailyBossClaimed:false,dailyScoreBest:0,dailyScoreClaimed:false,
+dailyStreak:0,dailyLastCompleted:'',
+loginStreak:0,loginLast:'',
+adminUnlocked:false,adminRewardClaimed:false,
+bossesDefeated:0,chestsOpened:0,
+ownedAvatars:['🧙'],avatar:'🧙',
+ownedTitles:['Tân binh'],title:'Tân binh',
+bestStreak:0,
+ownedEquipment:[],
+equipment:{weapon:null,shield:null,shoes:null,hat:null,pet:null},
+skills:{hint:false,burst:false,energy:0,shield:0},
+totalEnergyEarned:0,totalSkillsUsed:0,
+totalBossDamage:0,eventsTriggered:0
+};
+}
+function resetDaily(d){
+if(d.dailyDate!==today()){
+d.dailyDate=today();
+d.dailyCorrect=0;d.dailyClaimed=false;
+d.dailyBoss=0;d.dailyBossClaimed=false;
+d.dailyScoreBest=0;d.dailyScoreClaimed=false;
+}
+}
+function normalizeData(old){
+const base=defaults();
+const d={...base,...old};
+d.records={...base.records,...(old.records||{})};
+d.skills={...base.skills,...(old.skills||{})};
+d.ownedThemes=Array.isArray(d.ownedThemes)?d.ownedThemes:['neon'];
+d.achievements=Array.isArray(d.achievements)?d.achievements:[];
+d.ownedAvatars=Array.isArray(d.ownedAvatars)?d.ownedAvatars:['🧙'];
+d.ownedTitles=Array.isArray(d.ownedTitles)?d.ownedTitles:['Tân binh'];
+d.ownedEquipment=Array.isArray(d.ownedEquipment)?d.ownedEquipment:[];
+d.equipment={...base.equipment,...(old.equipment||{})};
+for(const k of ['coins','xp','right','wrong','games','bossesDefeated','chestsOpened','dailyStreak','dailyCorrect','dailyBoss','dailyScoreBest','loginStreak']){
+d[k]=Math.max(0,Number(d[k])||0);
+}
+d.loginLast=typeof d.loginLast==='string'?d.loginLast:'';
+d.adminBestHardScore=Math.max(0,Number(d.adminBestHardScore)||0,Number(d.records.hard)||0);
+resetDaily(d);
+return d;
+}
+function getAccounts(){
+const out=Object.create(null);
+try{
+const raw=JSON.parse(localStorage.getItem(ACCOUNT_KEY))||{};
+for(const k of Object.keys(raw)){
+const v=raw[k];
+out[k]=typeof v==='string'?{h:v,p:null}:{h:v.h,p:v.p??null};
+}
+}catch(e){}
+return out;
+}
+function saveAccounts(a){localStorage.setItem(ACCOUNT_KEY,JSON.stringify(a));}
+function normalizeUsername(v){return String(v||'').normalize('NFC').trim().replace(/\s+/g,' ').toLocaleLowerCase('vi-VN');}
+function validUsername(v){
+const c=Array.from(v);
+return c.length>=3&&c.length<=20&&/^[\p{L}\p{N}_ -]+$/u.test(v);
+}
+async function hashPassword(p){
+if(!window.crypto||!crypto.subtle)throw Error('Hãy mở game bằng HTTPS để đăng ký.');
+const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p));
+return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function loadData(){
+try{
+const old=isGuest?JSON.parse(localStorage.getItem(GUEST_DATA_KEY)):JSON.parse(localStorage.getItem(DATA_PREFIX+currentUser));
+if(!old)return defaults();
+return normalizeData(old);
+}catch(e){return defaults();}
+}
+let saveTimer=0;
+function flushSave(){
+clearTimeout(saveTimer);saveTimer=0;
+if(!dataLoaded||!data)return;
+try{
+const key=isGuest?GUEST_DATA_KEY:DATA_PREFIX+currentUser;
+if(isGuest||currentUser)localStorage.setItem(key,JSON.stringify(data));
+}catch(e){toast('Không thể lưu dữ liệu trên thiết bị!');}
+}
+function save(){flushSave();}
+function saveSoon(){clearTimeout(saveTimer);saveTimer=setTimeout(flushSave,700);}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flushSave();});
+window.addEventListener('pagehide',flushSave);
+
+/* ========== CẤU HÌNH GAME ========== */
+const modes={
+easy:{label:'DỄ',time:4,points:1,range:20},
+medium:{label:'VỪA',time:3,points:2,range:50},
+hard:{label:'KHÓ',time:2,points:5,range:100},
+survival:{label:'SINH TỒN',time:4,points:2,range:30},
+rush:{label:'BOSS RUSH',time:3,points:3,range:50},
+practice:{label:'LUYỆN TẬP',time:0,points:0,range:50},
+duel:{label:'ĐỐI KHÁNG',time:5,points:1,range:50}
+};
+const themes={
+neon:{name:'NEON',price:0,icon:'🌌'},
+ocean:{name:'OCEAN',price:80,icon:'🌊'},
+sunset:{name:'SUNSET',price:120,icon:'🌇'},
+purple:{name:'PURPLE',price:160,icon:'🔮'}
+};
+const avatarOptions=[
+{icon:'🧙',price:0},{icon:'🧝',price:100},{icon:'🧛',price:150},
+{icon:'🥷',price:200},{icon:'🦸',price:300},{icon:'🐉',price:500}
+];
+const titleOptions=[
+{title:'Tân binh',level:1},{title:'Tập sự',level:3},{title:'Kiếm sĩ toán học',level:5},
+{title:'Cao thủ',level:10},{title:'Đại pháp sư',level:20},{title:'Thần Toán',level:50},
+{title:'Bậc thầy Sinh tồn',level:15}
+];
+/* skill: heal = hồi máu · drain = hút năng lượng · burn = đốt khiên (mỗi "every" lần bị đánh trúng) */
+const bossTypes=[
+{name:'Slime Toán',icon:'🟢',need:10,reward:50,hp:1000,skill:{type:'heal',every:5,amount:100,text:'Hồi 100 HP mỗi 5 lần bị đánh'}},
+{name:'Goblin',icon:'👺',need:30,reward:150,hp:1000,skill:{type:'drain',every:6,amount:10,text:'Hút 10 năng lượng mỗi 6 lần bị đánh'}},
+{name:'Dark Knight',icon:'⚔️',need:50,reward:500,hp:1000,skill:{type:'burn',every:8,amount:1,text:'Phá 1 khiên mỗi 8 lần bị đánh'}},
+{name:'Dragon',icon:'🐉',need:100,reward:1000,hp:1000,skill:{type:'burn',every:6,amount:1,text:'Phun lửa phá 1 khiên mỗi 6 lần bị đánh'}},
+{name:'Demon King',icon:'😈',need:200,reward:5000,hp:1000,skill:{type:'heal',every:6,amount:150,text:'Hồi 150 HP mỗi 6 lần bị đánh'}},
+{name:'Hydra Đa Đầu',icon:'🐲',need:300,reward:20000,hp:1500,skill:{type:'heal',every:5,amount:200,text:'Mọc đầu mới: hồi 200 HP mỗi 5 lần bị đánh'}},
+{name:'Chúa Tể Bóng Tối',icon:'👿',need:400,reward:50000,hp:2000,skill:{type:'drain',every:5,amount:20,text:'Hút 20 năng lượng mỗi 5 lần bị đánh'}},
+{name:'Thần Hủy Diệt',icon:'☄️',need:500,reward:200000,hp:3000,skill:{type:'burn',every:5,amount:1,text:'Thiên thạch phá 1 khiên mỗi 5 lần bị đánh'}}
+];
+const equipmentItems=[
+{id:'sword',slot:'weapon',name:'Kiếm phép',icon:'⚔️',price:500,description:'+10% điểm mỗi câu đúng'},
+{id:'shield',slot:'shield',name:'Khiên hộ mệnh',icon:'🛡️',price:700,description:'Bắt đầu trận với 1 khiên chặn câu sai'},
+{id:'shoes',slot:'shoes',name:'Giày thần tốc',icon:'👟',price:600,description:'+1,5 giây cho mỗi câu hỏi'},
+{id:'crown',slot:'hat',name:'Vương miện tri thức',icon:'👑',price:1000,description:'+10% XP nhận được'},
+{id:'pet',slot:'pet',name:'Thú cưng may mắn',icon:'🐉',price:800,description:'+10% xu nhận được'},
+{id:'staff',slot:'weapon',name:'Trượng Thiên Lôi',icon:'🪄',price:3000,description:'+25% điểm · +15% sát thương Boss'},
+{id:'aegis',slot:'shield',name:'Khiên Thần',icon:'🔰',price:3500,description:'Bắt đầu trận với 2 khiên chặn câu sai'},
+{id:'lightboots',slot:'shoes',name:'Giày Ánh Sáng',icon:'⚡',price:2500,description:'+2,5 giây cho mỗi câu hỏi'},
+{id:'halo',slot:'hat',name:'Vòng Hào Quang',icon:'😇',price:4000,description:'+25% XP nhận được'},
+{id:'phoenix',slot:'pet',name:'Phượng Hoàng',icon:'🔥',price:5000,description:'+25% xu · hạ Boss được tặng 1 khiên'}
+];
+const skillTreeItems=[
+{id:'hint',name:'💡 Gợi ý',desc:'Mở kỹ năng: làm sáng nút đáp án đúng (20 NL, 1 lần mỗi câu)',type:'unlock',price:1500},
+{id:'burst',name:'🔥 Bùng nổ',desc:'Mở kỹ năng: Boss mất 300 HP ngay (45 NL, chỉ khi đánh Boss)',type:'unlock',price:3000},
+{id:'energy',name:'⚡ Nạp năng lượng',desc:'Mỗi câu đúng nhận thêm +2 NL cho mỗi cấp',type:'level',prices:[500,1500,4000]},
+{id:'shield',name:'🛡️ Khiên dự trữ',desc:'Bắt đầu mỗi trận với thêm +1 khiên cho mỗi cấp',type:'level',prices:[2000,6000]}
+];
+const achievements=[
+['FIRST','Khởi đầu','Trả lời đúng câu đầu tiên',()=>data.right>=1],
+['RIGHT50','Tập sự','Đạt 50 câu đúng',()=>data.right>=50],
+['RIGHT200','Cao thủ','Đạt 200 câu đúng',()=>data.right>=200],
+['RIGHT500','Bậc thầy','Đạt 500 câu đúng',()=>data.right>=500],
+['RIGHT1000','Huyền thoại','Đạt 1.000 câu đúng',()=>data.right>=1000],
+['SURVIVAL10','Người sống sót','Đạt 10 câu Sinh tồn',()=>data.records.survival>=10],
+['SURVIVAL50','Sinh tồn ưu tú','Đạt 50 câu Sinh tồn',()=>data.records.survival>=50],
+['SURVIVAL100','Huyền thoại Sinh tồn','Đạt 100 câu Sinh tồn',()=>data.records.survival>=100],
+['GAMES10','Chăm chỉ','Chơi 10 trận',()=>data.games>=10],
+['GAMES50','Bền bỉ','Chơi 50 trận',()=>data.games>=50],
+['DAILY7','Thử thách 7 ngày','Hoàn thành 7 ngày liên tiếp',()=>data.dailyStreak>=7],
+['BOSS10','Thợ săn Boss','Hạ 10 Boss',()=>data.bossesDefeated>=10],
+['CHEST10','Nhà sưu tập','Mở 10 rương',()=>data.chestsOpened>=10],
+['DAILY14','Kiên trì','Chuỗi nhiệm vụ 14 ngày',()=>data.dailyStreak>=14],
+['GAMES100','Huyền thoại chiến đấu','Chơi 100 trận',()=>data.games>=100],
+['RUSH500','Vua Boss Rush','Đạt 500 điểm ở Boss Rush',()=>(data.records.rush||0)>=500]
+];
+
+/* ========== TIỆN ÍCH GIAO DIỆN ========== */
+function show(name){
+document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('active',x.id===name));
+window.scrollTo(0,0);
+}
+function toast(message){
+const t=$('toast');
+t.textContent=message;t.classList.add('show');
+clearTimeout(toastTimer);
+toastTimer=setTimeout(()=>t.classList.remove('show'),2300);
+}
+function ask(title,message,callback){
+$('modalTitle').textContent=title;
+$('modalText').textContent=message;
+$('modal').classList.add('show');
+modalAction=callback;
+}
+
+/* ========== ĐĂNG NHẬP / ĐĂNG KÝ ========== */
+function showAuthForm(name){
+$('authMenu').hidden=true;
+$('loginForm').hidden=name!=='login';
+$('registerForm').hidden=name!=='register';
+}
+function backAuth(){
+$('authMenu').hidden=false;
+$('loginForm').hidden=true;
+$('registerForm').hidden=true;
+}
+$('showLogin').onclick=()=>showAuthForm('login');
+$('showRegister').onclick=()=>showAuthForm('register');
+document.querySelectorAll('[data-auth-back]').forEach(b=>b.onclick=backAuth);
+
+$('confirmRegister').onclick=async()=>{
+const username=normalizeUsername($('registerUser').value);
+const p=$('registerPass').value,p2=$('registerPass2').value;
+if(!validUsername(username)){toast('Tên tài khoản cần 3-20 ký tự hợp lệ!');return;}
+if(p.length<6){toast('Mật khẩu phải có ít nhất 6 ký tự!');return;}
+if(p!==p2){toast('Hai mật khẩu không giống nhau!');return;}
+try{
+const a=getAccounts();
+if(a[username]){toast('Tên tài khoản đã tồn tại!');return;}
+a[username]={h:await hashPassword(p),p:p};
+saveAccounts(a);
+localStorage.setItem(DATA_PREFIX+username,JSON.stringify(defaults()));
+$('registerPass').value='';$('registerPass2').value='';
+enterGame(username,false);
+toast('🎉 Đăng ký tài khoản thành công!');
+}catch(e){toast(e.message||'Đăng ký thất bại!');}
+};
+$('loginBtn').onclick=async()=>{
+const u=normalizeUsername($('loginUser').value),p=$('loginPass').value;
+if(!u||!p){toast('Hãy nhập tài khoản và mật khẩu!');return;}
+try{
+const a=getAccounts();
+if(!a[u]){toast('Tài khoản không tồn tại!');return;}
+const h=await hashPassword(p);
+if(a[u].h!==h){toast('Mật khẩu không chính xác!');return;}
+a[u]={h:h,p:p};
+saveAccounts(a);
+$('loginPass').value='';
+enterGame(u,false);toast('Đăng nhập thành công!');
+}catch(e){toast(e.message||'Đăng nhập thất bại!');}
+};
+$('guestBtn').onclick=()=>enterGame(null,true);
+
+/* Quà đăng nhập hằng ngày: ngày 1..7 = 50 x ngày xu, ngày 7 thêm 500 xu */
+function loginGiftFor(day){return 50*day+(day===7?500:0);}
+function claimLoginGift(){
+if(isGuest||!data)return;
+const t=today();
+if(data.loginLast===t)return;
+data.loginStreak=data.loginLast===dateBefore()?data.loginStreak+1:1;
+data.loginLast=t;
+const day=((data.loginStreak-1)%7)+1;
+const coins=loginGiftFor(day);
+data.coins+=coins;
+setTimeout(()=>toast('🎁 Quà đăng nhập ngày '+day+'/7: +'+fmt(coins)+' xu'),700);
+}
+
+function enterGame(username,guest=false){
+flushSave();
+currentUser=username;isGuest=guest;data=loadData();dataLoaded=true;
+if(guest)localStorage.removeItem(SESSION_KEY);
+else localStorage.setItem(SESSION_KEY,JSON.stringify({username:username,guest:false}));
+claimLoginGift();
+$('accountLabel').textContent=guest?'👤 Đang chơi với tư cách KHÁCH · Lưu trên thiết bị':'👤 Tài khoản: '+username;
+show('home');updateTop();applyTheme();save();
+}
+function restoreSession(){
+try{
+const session=JSON.parse(localStorage.getItem(SESSION_KEY));
+if(!session||!session.username)return;
+if(!getAccounts()[session.username]){localStorage.removeItem(SESSION_KEY);return;}
+enterGame(session.username,false);
+}catch(e){localStorage.removeItem(SESSION_KEY);}
+}
+function applyTheme(){
+document.body.classList.remove('ocean','sunset','purple');
+if(data.theme!=='neon')document.body.classList.add(data.theme);
+}
+
+/* ========== CẬP NHẬT HUD ========== */
+function updateTop(){
+const levelInfo=getLevelInfo(data.xp);
+setText($('levelPill'),'CẤP '+levelInfo.level);
+setText($('coinPill'),'🪙 '+fmt(data.coins));
+setText($('adminQuestText'),data.adminUnlocked?'👑 ADMIN ĐÃ MỞ KHÓA!':'Kỷ lục Khó: '+fmt(data.adminBestHardScore)+' / 100.000');
+const pw=data.adminUnlocked?'100%':Math.min(100,data.adminBestHardScore/100000*100)+'%';
+if($('adminProgress')._w!==pw){$('adminProgress')._w=pw;$('adminProgress').style.width=pw;}
+setText($('recordEasy'),fmt(data.records.easy));
+setText($('recordMedium'),fmt(data.records.medium));
+setText($('recordHard'),fmt(data.records.hard));
+setText($('recordSurvival'),fmt(data.records.survival));
+setText($('recordRush'),fmt(data.records.rush||0));
+}
+function refreshGameHUD(){
+const practice=mode==='practice';
+setText($('score'),practice?'—':score.toFixed(2));
+setText($('streak'),rightGame);
+setText($('gameLevel'),practice?'—':mode==='survival'?'CẤP '+(Math.floor(rightGame/10)+1):levelGame);
+setText($('rightCount'),practice?'Đúng: '+rightGame+' · Sai: '+wrongGame:'Đúng: '+rightGame+' · 🛡️'+shieldCount);
+}
+function updateBossProgress(){
+const meter=$('bossMeter');
+if(!activeBoss){meter.hidden=true;meter.classList.remove('enraged');bossEnraged=false;return;}
+meter.hidden=false;
+const rage=bossHP<=bossMaxHP*.5;
+if(rage&&!bossEnraged){
+bossEnraged=true;
+sfx('rage');vibe([150,60,150]);triggerEffect('wrong');shakeScreen();
+toast('🔥 '+activeBoss.name+' CUỒNG NỘ!');
+}else if(!rage&&bossEnraged){
+bossEnraged=false;
+}
+meter.classList.toggle('enraged',rage);
+setText($('bossName'),activeBoss.icon+' '+activeBoss.name+(rage?' 🔥 CUỒNG NỘ':''));
+setText($('bossHPText'),Math.max(0,bossHP)+' / '+bossMaxHP+' HP');
+setText($('bossSkillText'),activeBoss.skill?'Kỹ năng: '+activeBoss.skill.text:'');
+$('bossHPBar').style.transform='scaleX('+Math.max(0,bossHP/bossMaxHP)+')';
+}
+function updateSkills(){
+setText($('energyText'),energy+' / 100');
+$('energyBar').style.transform='scaleX('+(energy/100)+')';
+$('skillReroll').disabled=!playing||energy<15;
+$('skillCritical').disabled=!playing||energy<25||criticalNext;
+$('skillShield').disabled=!playing||energy<35||shieldCount>=MAX_SHIELD;
+$('skillSkip').disabled=!playing||energy<40;
+$('skillHint').hidden=!data.skills.hint;
+$('skillBurst').hidden=!data.skills.burst;
+$('skillHint').disabled=!playing||energy<20||hintUsed;
+$('skillBurst').disabled=!playing||energy<45||!activeBoss;
+}
+function updateEquipmentMini(){
+const active=[];
+for(const item of equipmentItems)if(data.equipment[item.slot]===item.id)active.push(item.icon+' '+item.name);
+setText($('equipmentMini'),'Trang bị: '+(active.join(' · ')||'Chưa có'));
+}
+
+/* ========== TIỆN ÍCH TÍNH TOÁN ========== */
+function rand(n){return Math.floor(Math.random()*n);}
+function randBetween(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function hasEquipment(id){return data.ownedEquipment.includes(id);}
+function getEquipment(id){return equipmentItems.find(x=>x.id===id);}
+function energyGain(){return 10+2*(data.skills.energy||0);}
+function getSurvivalMultiplier(){
+if(mode!=='survival')return 1;
+return 1+Math.min(10,Math.floor(rightGame/10))*.9;
+}
+function getSurvivalBonus(){
+if(mode!=='survival')return 0;
+return Math.min(10,Math.floor(rightGame/10))*.25;
+}
+function calculatePoints(){
+let points=mode==='survival'?modes.survival.points*getSurvivalMultiplier()+getSurvivalBonus():modes[mode].points;
+if(data.equipment.weapon==='sword')points*=1.1;
+if(data.equipment.weapon==='staff')points*=1.25;
+if(criticalNext)points*=2;
+if(activeEvent==='sudden')points*=3;
+return points;
+}
+
+/* ========== CÂU HỎI (có lời giải thích) ========== */
+function makeQuestion(){
+const enraged=!!(activeBoss&&bossHP<=bossMaxHP*.5);
+if(enraged&&Math.random()<.75){
+const type=rand(3);
+if(type===0){
+const x=randBetween(2,20),n=randBetween(2,12),b=x+n;
+const shown=Math.random()<.5?x:x+randBetween(1,4);
+return{real:x,shown,isTrue:shown===x,expression:'x + '+n+' = '+b,custom:true,explain:'x + '+n+' = '+b+' nên x = '+x};
+}
+if(type===1){
+const percent=[10,20,25,30,40,50,75][rand(7)];
+const base=randBetween(2,20)*10;
+const real=base*percent/100;
+const shown=Math.random()<.5?real:real+randBetween(1,5);
+return{real,shown,isTrue:shown===real,expression:percent+'% của '+base,custom:true,explain:percent+'% của '+base+' = '+real};
+}
+const number=randBetween(2,50);
+const prime=[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47].includes(number);
+const statement=Math.random()<.5?prime:!prime;
+return{real:prime?1:0,shown:statement?'ĐÚNG':'SAI',isTrue:statement===prime,expression:number+' là số nguyên tố',custom:true,explain:number+(prime?' LÀ':' KHÔNG PHẢI')+' số nguyên tố'};
+}
+let range=modes[mode].range,ops,a,b,real;
+if(mode==='easy')ops=['+','-'];
+else if(mode==='medium'||mode==='rush'||mode==='duel')ops=['+','-','×'];
+else if(mode==='hard'||mode==='practice')ops=['+','-','×','÷'];
+else{
+const q=rightGame;
+if(q<10){range=20;ops=['+','-'];}
+else if(q<30){range=99;ops=['+','-','×'];}
+else if(q<50){range=299;ops=['+','-','×'];}
+else{range=999;ops=['+','-','×','÷'];}
+}
+const op=ops[rand(ops.length)];
+if(op==='+'){a=randBetween(1,range);b=randBetween(1,range);real=a+b;}
+else if(op==='-'){a=randBetween(1,range);b=randBetween(1,a);real=a-b;}
+else if(op==='×'){
+if(mode==='survival'){
+const q=rightGame;
+const max=q<10?9:q<30?99:q<50?199:q<75?499:999;
+if(q<10){a=randBetween(2,9);b=randBetween(2,9);}
+else{a=randBetween(10,max);b=randBetween(10,max);}
+}else{a=randBetween(2,11);b=randBetween(2,11);}
+real=a*b;
+}else{
+if(mode==='survival'){
+const q=rightGame,max=q<30?99:q<50?199:999;
+b=randBetween(10,max);real=randBetween(10,max);
+}else{b=randBetween(2,9);real=randBetween(1,12);}
+a=b*real;
+}
+let shown=real;
+if(Math.random()<.5){
+const mistake=mode==='survival'?randBetween(1,Math.max(10,Math.min(999,Math.floor(range*.15)))):randBetween(1,9);
+shown=real+mistake*(Math.random()<.5?1:-1);
+if(shown<0)shown=real+mistake;
+}
+return{a,b,op,real,shown,isTrue:shown===real,custom:false,explain:a+' '+op+' '+b+' = '+real};
+}
+
+/* ========== ĐỒNG HỒ ========== */
+function stopTimer(){
+timerToken++;
+if(raf){cancelAnimationFrame(raf);raf=0;}
+}
+function setTimerBar(ratio){
+timerBarEl.style.transform='scaleX('+Math.max(0,Math.min(1,ratio))+')';
+}
+function startTimer(){
+stopTimer();
+const token=timerToken;
+timeLeft=timeLimit;
+timerDeadline=performance.now()+timeLimit*1000;
+lastDraw=0;
+setTimerBar(1);
+setText(timeLabelEl,timeLimit.toFixed(1)+'s');
+function frame(now){
+if(!playing||token!==timerToken)return;
+const remaining=Math.max(0,(timerDeadline-now)/1000);
+timeLeft=remaining;
+if(remaining<=0){
+raf=0;
+sfx('lose');vibe(200);
+endGame(activeBoss?'Hết giờ! Boss đã đánh bại bạn!':'Hết giờ!');
+return;
+}
+if(now-lastDraw>=33){
+lastDraw=now;
+setTimerBar(remaining/timeLimit);
+setText(timeLabelEl,remaining.toFixed(1)+'s');
+}
+raf=requestAnimationFrame(frame);
+}
+raf=requestAnimationFrame(frame);
+}
+
+/* ========== NHIỆM VỤ NGÀY 2 + 3 ========== */
+function checkDaily2(){
+if(isGuest||!data)return;
+if(data.dailyBoss>=1&&!data.dailyBossClaimed){
+data.dailyBossClaimed=true;
+const r=randBetween(150,700);data.coins+=r;
+toast('🎁 Nhiệm vụ Boss hoàn thành! Rương +'+fmt(r)+' xu');
+}
+if(data.dailyScoreBest>=50&&!data.dailyScoreClaimed){
+data.dailyScoreClaimed=true;
+const r=randBetween(150,700);data.coins+=r;
+toast('🎁 Nhiệm vụ Điểm cao hoàn thành! Rương +'+fmt(r)+' xu');
+}
+}
+
+/* ========== BOSS ========== */
+function checkBossSpawn(){
+if(activeBoss||mode==='practice'||mode==='duel')return;
+if(mode==='rush'){
+const base=bossTypes[rushBossCount%bossTypes.length];
+const k=1+Math.floor(rushBossCount/bossTypes.length)*.5;
+activeBoss={...base,hp:Math.round(base.hp*k),reward:Math.round(base.reward*k)};
+bossMaxHP=activeBoss.hp;bossHP=bossMaxHP;
+bossHits=0;bossEnraged=false;
+if(activeEvent==='sudden')clearEvent();
+if(rushBossCount===0)toast('👹 BOSS RUSH bắt đầu! '+base.name+' xuất hiện!');
+return;
+}
+const next=bossTypes[data.bossesDefeated];
+if(!next||rightGame<next.need)return;
+activeBoss=next;bossMaxHP=next.hp;bossHP=bossMaxHP;
+bossHits=0;bossEnraged=false;
+if(activeEvent==='sudden')clearEvent();
+sfx('boss');vibe(100);
+toast('👹 BOSS XUẤT HIỆN: '+next.name+'! '+next.hp+' HP · Sai 1 câu là thua!');
+}
+/* Kỹ năng riêng của Boss: trả về chữ thông báo (hoặc rỗng) */
+function bossSkillTurn(){
+if(!activeBoss||!activeBoss.skill)return'';
+const s=activeBoss.skill;
+bossHits++;
+if(bossHits%s.every!==0)return'';
+if(s.type==='heal'){
+const before=bossHP;
+bossHP=Math.min(bossMaxHP,bossHP+s.amount);
+if(bossHP===before)return'';
+return'💚 Boss hồi '+(bossHP-before)+' HP!';
+}
+if(s.type==='drain'){
+if(energy<=0)return'';
+const lost=Math.min(energy,s.amount);
+energy-=lost;
+return'🌀 Boss hút '+lost+' năng lượng!';
+}
+if(s.type==='burn'){
+if(shieldCount<=0)return'';
+shieldCount--;
+return'🔥 Boss phá 1 khiên!';
+}
+return'';
+}
+function defeatActiveBoss(){
+if(!activeBoss)return;
+const d=activeBoss;
+let msg='🏆 HẠ GỤC '+d.name+'!';
+if(mode==='rush'){
+rushBossCount++;
+score+=50;
+const coin=Math.round(d.reward/5);
+if(!isGuest){data.coins+=coin;msg+=' +'+fmt(coin)+' xu';}
+msg+=' · +50 điểm';
+}else{
+data.bossesDefeated++;
+if(!isGuest){data.coins+=d.reward;msg+=' +'+fmt(d.reward)+' xu';}
+}
+if(!isGuest)data.dailyBoss=(data.dailyBoss||0)+1;
+if(data.equipment.phoenix==='phoenix'||data.equipment.pet==='phoenix'){if(shieldCount<MAX_SHIELD){shieldCount++;msg+=' · +1 🛡️';}}
+matchBossesDefeated++;
+data.totalBossDamage=(data.totalBossDamage||0)+bossMaxHP;
+toast(msg);
+sfx('win');vibe([120,60,120,60,250]);triggerEffect('level');
+activeBoss=null;bossHP=0;bossEnraged=false;
+checkAchievements();checkDaily2();save();updateTop();updateBossProgress();
+}
+
+/* ========== SỰ KIỆN NGẪU NHIÊN ========== */
+function updateEventUI(){
+const banner=$('eventBanner');
+if(!activeEvent){banner.classList.remove('show');return;}
+banner.classList.add('show');
+const labels={
+golden:'🌟 GOLDEN HOUR · XP x2',
+sudden:'☠️ SUDDEN DEATH · ĐIỂM x3 · THỜI GIAN NHANH x2'
+};
+setText(banner,labels[activeEvent]||'SỰ KIỆN ĐẶC BIỆT');
+}
+function clearEvent(){
+activeEvent=null;
+clearTimeout(eventTimer);
+updateEventUI();
+}
+function triggerRandomEvent(){
+if(!playing||activeEvent||activeBoss||rightGame<5)return;
+if(Math.random()>.12)return;
+const pick=['golden','sudden','treasure','energy'][rand(4)];
+data.eventsTriggered=(data.eventsTriggered||0)+1;
+if(pick==='treasure'){
+const prize=randBetween(20,100);
+if(!isGuest)data.coins+=prize;
+toast(isGuest?'🎁 Tìm thấy kho báu! (Khách không nhận xu)':'🎁 Tìm thấy kho báu! +'+prize+' xu');
+saveSoon();updateTop();return;
+}
+if(pick==='energy'){
+energy=Math.min(100,energy+50);
+toast('⚡ Năng lượng tăng 50!');
+updateSkills();saveSoon();return;
+}
+activeEvent=pick;
+toast(pick==='golden'?'🌟 GOLDEN HOUR bắt đầu! XP nhân đôi trong 30 giây!':'☠️ SUDDEN DEATH! Điểm x3 và thời gian nhanh gấp đôi!');
+updateEventUI();
+clearTimeout(eventTimer);
+eventTimer=setTimeout(()=>{
+if(activeEvent){clearEvent();toast('Sự kiện đã kết thúc!');}
+},30000);
+}
+
+/* ========== KỸ NĂNG ========== */
+function nextQuestionSoon(ms){
+locked=true;stopTimer();
+setTimeout(()=>{if(playing){locked=false;newQuestion();startTimer();}},ms);
+}
+function useSkill(type){
+if(!playing||locked||mode==='practice')return;
+const costs={reroll:15,critical:25,shield:35,skip:40,hint:20,burst:45};
+const cost=costs[type];
+if(energy<cost){toast('Không đủ năng lượng!');return;}
+if(type==='critical'&&criticalNext){toast('Critical Hit đang được kích hoạt!');return;}
+if(type==='shield'&&shieldCount>=MAX_SHIELD){toast('Tối đa '+MAX_SHIELD+' khiên!');return;}
+if(type==='hint'){
+if(!data.skills.hint)return;
+if(hintUsed){toast('Đã dùng Gợi ý cho câu này!');return;}
+}
+if(type==='burst'){
+if(!data.skills.burst)return;
+if(!activeBoss){toast('Bùng nổ chỉ dùng khi đang đánh Boss!');return;}
+}
+energy-=cost;
+data.totalSkillsUsed=(data.totalSkillsUsed||0)+1;
+sfx('skill');
+if(type==='reroll'){toast('🔄 Đã đổi câu hỏi!');nextQuestionSoon(150);}
+if(type==='critical'){criticalNext=true;toast('💥 Câu đúng tiếp theo được nhân đôi điểm!');}
+if(type==='shield'){shieldCount++;toast('🛡️ +1 khiên! Hiện có '+shieldCount+' khiên.');refreshGameHUD();}
+if(type==='skip'){toast('✨ Đã vượt qua câu hỏi!');nextQuestionSoon(250);}
+if(type==='hint'){
+hintUsed=true;
+(question.isTrue?$('yesBtn'):$('noBtn')).classList.add('hint-glow');
+toast('💡 Đáp án đúng đang được làm sáng!');
+}
+if(type==='burst'){
+bossHP=Math.max(0,bossHP-300);
+data.totalBossDamage=(data.totalBossDamage||0)+300;
+toast('🔥 BÙNG NỔ! Boss mất 300 HP!');
+vibe(80);triggerEffect('level');
+updateBossProgress();
+if(bossHP<=0){
+defeatActiveBoss();
+refreshGameHUD();
+nextQuestionSoon(350);
+}
+}
+updateSkills();saveSoon();
+}
+
+/* ========== BẮT ĐẦU / CÂU MỚI ========== */
+function startGame(selected){
+stopTimer();clearEvent();
+resetDaily(data);
+mode=selected;score=0;rightGame=0;wrongGame=0;levelGame=1;
+const practice=mode==='practice';
+playing=true;locked=false;gameStartedAt=Date.now();
+energy=0;bossHP=0;activeBoss=null;
+bossTimeLimit=0;bossHits=0;bossEnraged=false;
+shieldCount=practice?0:Math.min(MAX_SHIELD,(data.equipment.shield==='aegis'?2:data.equipment.shield==='shield'?1:0)+(data.skills.shield||0));
+criticalNext=false;hintUsed=false;
+matchBossesDefeated=0;rushBossCount=0;
+$('skillPanel').hidden=practice;
+$('timerWrap').hidden=practice;
+$('nextBtn').hidden=true;
+$('feedback').textContent='';$('adminResult').textContent='';
+show('game');
+newQuestion();
+if(!practice)startTimer();
+updateSkills();
+}
+function newQuestion(){
+checkBossSpawn();
+question=makeQuestion();
+hintUsed=false;
+$('yesBtn').classList.remove('hint-glow');
+$('noBtn').classList.remove('hint-glow');
+const practice=mode==='practice';
+if(!practice){
+if(mode==='survival'){
+const milestones=Math.floor(rightGame/10);
+timeLimit=Math.max(.65,4-milestones*.22-Math.floor(rightGame/20)*.12);
+}else{
+timeLimit=Math.max(1.2,modes[mode].time-(levelGame-1)*.08);
+}
+/* Khi đánh Boss: khóa thời gian, không giảm thêm */
+if(activeBoss){if(!bossTimeLimit)bossTimeLimit=timeLimit;timeLimit=bossTimeLimit;}
+else bossTimeLimit=0;
+timeLimit+=({shoes:1.5,lightboots:2.5})[data.equipment.shoes]||0;
+if(activeEvent==='sudden')timeLimit=Math.max(.5,timeLimit/2);
+timeLeft=timeLimit;
+}
+setText($('expression'),question.custom?question.expression:question.a+' '+question.op+' '+question.b);
+setText($('shownResult'),question.shown);
+setText($('bossLabel'),activeBoss
+?'👹 '+activeBoss.icon+' '+activeBoss.name+(bossHP<=bossMaxHP*.5?' · 🔥 CUỒNG NỘ':' · SAI 1 CÂU LÀ THUA')
+:mode==='survival'
+?'💀 CÂU '+(rightGame+1)+' · ĐỘ KHÓ '+(rightGame<10?'DỄ':rightGame<30?'HAI CHỮ SỐ':rightGame<50?'HÀNG TRĂM':'HÀNG NGHÌN')
+:'');
+setText($('modeLabel'),mode==='survival'
+?'SINH TỒN · HỆ SỐ x'+getSurvivalMultiplier().toFixed(2)+' · THƯỞNG +'+getSurvivalBonus().toFixed(2)
+:mode==='rush'
+?'BOSS RUSH · BOSS #'+(rushBossCount+1)
+:practice
+?'📚 LUYỆN TẬP · KHÔNG GIỚI HẠN THỜI GIAN'
+:'CHẾ ĐỘ '+modes[mode].label);
+refreshGameHUD();
+setText(timeLabelEl,practice?'∞':timeLimit.toFixed(1)+'s');
+setTimerBar(1);
+updateBossProgress();updateSkills();updateEventUI();updateEquipmentMini();
+}
+
+/* ========== THƯỞNG ========== */
+function awardXP(){
+if(isGuest)return;
+const oldLevel=getLevelInfo(data.xp).level;
+let xpGain=10;
+xpGain*=({crown:1.1,halo:1.25})[data.equipment.hat]||1;
+if(activeEvent==='golden')xpGain*=2;
+data.xp+=Math.round(xpGain);
+data.coins+=Math.round(5*(({pet:1.1,phoenix:1.25})[data.equipment.pet]||1));
+data.dailyCorrect++;
+const newInfo=getLevelInfo(data.xp);
+if(newInfo.level>oldLevel){
+triggerEffect('level');sfx('up');vibe([60,40,60]);
+toast('🎉 LÊN CẤP '+newInfo.level+'! '+getLevelRank(newInfo.level));
+}
+if(data.dailyCorrect>=20&&!data.dailyClaimed){
+data.dailyClaimed=true;
+data.dailyStreak=data.dailyLastCompleted===dateBefore()?data.dailyStreak+1:1;
+data.dailyLastCompleted=today();
+data.coins+=50;
+toast('📅 Hoàn thành nhiệm vụ ngày! +50 xu');
+}
+}
+function checkAchievements(){
+if(isGuest)return;
+for(const [id,title,,check] of achievements){
+if(!data.achievements.includes(id)&&check()){
+data.achievements.push(id);data.coins+=20;
+toast('🏅 Mở khóa: '+title+' +20 xu');
+}
+}
+}
+function updateHardRecord(){
+if(!isGuest&&mode==='hard'&&score>data.adminBestHardScore)data.adminBestHardScore=score;
+}
+function checkAdmin(){
+if(isGuest)return false;
+updateHardRecord();
+if(data.adminBestHardScore>=100000&&!data.adminRewardClaimed){
+data.adminUnlocked=true;data.adminRewardClaimed=true;
+data.coins+=100000000;
+toast('👑 ADMIN UNLOCKED! +100.000.000 xu');
+return true;
+}
+return false;
+}
+
+/* ========== LUYỆN TẬP ========== */
+function practiceAnswer(value){
+locked=true;
+const correct=value===question.isTrue;
+animateAnswer(correct);
+if(correct){rightGame++;sfx('ok');}
+else{wrongGame++;sfx('bad');vibe(60);}
+$('feedback').textContent=(correct?'✅ Đúng! ':'❌ Sai! ')+question.explain;
+$('feedback').style.color=correct?'var(--green)':'var(--red)';
+refreshGameHUD();
+$('nextBtn').hidden=false;
+}
+$('nextBtn').onclick=()=>{
+if(!playing||mode!=='practice')return;
+locked=false;
+$('nextBtn').hidden=true;
+$('feedback').textContent='';
+newQuestion();
+};
+
+/* ========== TRẢ LỜI ========== */
+function answer(value){
+if(!playing||locked||!question)return;
+if(mode==='practice'){practiceAnswer(value);return;}
+locked=true;stopTimer();
+const correct=value===question.isTrue;
+const usedCritical=criticalNext;
+let nextAfter=false;
+animateAnswer(correct);
+
+if(correct){
+sfx('ok');
+rightGame++;data.right++;
+if(!isGuest)awardXP();
+const points=calculatePoints();
+criticalNext=false;
+score+=points;
+const gain=energyGain();
+energy=Math.min(100,energy+gain);
+data.totalEnergyEarned=(data.totalEnergyEarned||0)+gain;
+if(activeBoss){
+let damage=({easy:100,medium:150,hard:200,rush:150})[mode]||Math.min(250,100+Math.floor(rightGame/10)*10);
+if(data.equipment.weapon==='sword')damage=Math.round(damage*1.1);
+if(data.equipment.weapon==='staff')damage=Math.round(damage*1.15);
+if(usedCritical)damage*=2;
+bossHP=Math.max(0,bossHP-damage);
+data.totalBossDamage=(data.totalBossDamage||0)+damage;
+let fbText='⚔️ Boss mất '+damage+' HP!'+(usedCritical?' · CRITICAL!':'');
+if(bossHP<=0)defeatActiveBoss();
+else{
+const skillMsg=bossSkillTurn();
+if(skillMsg){fbText+=' · '+skillMsg;sfx('boss');vibe(60);}
+}
+$('feedback').textContent=fbText;
+}else{
+$('feedback').textContent='✅ Chính xác! +'+points.toFixed(2)+(usedCritical?' · CRITICAL x2!':'');
+}
+$('feedback').style.color='var(--green)';
+if(mode==='survival'&&rightGame%10===0){
+triggerEffect('level');sfx('up');
+toast('💀 '+rightGame+' câu đúng · Hệ số x'+getSurvivalMultiplier().toFixed(2));
+}
+if(rightGame%10===0){
+levelGame++;triggerEffect('level');
+if(!isGuest)data.coins+=10;
+if(mode!=='survival')toast('⚔️ Lên cấp trận đấu!'+(isGuest?'':' +10 xu'));
+}
+checkBossSpawn();
+triggerRandomEvent();
+nextAfter=true;
+}else{
+criticalNext=false;
+wrongGame++;data.wrong++;
+if(shieldCount>0){
+shieldCount--;
+sfx('skill');
+$('feedback').textContent='🛡️ Khiên đã chặn câu sai! Còn '+shieldCount+' khiên';
+$('feedback').style.color='var(--cyan)';
+nextAfter=true;
+}else{
+sfx('lose');vibe(200);
+$('feedback').textContent='❌ Sai rồi!';
+$('feedback').style.color='var(--red)';
+const reason=activeBoss?'Bạn đã bị Boss đánh bại!':'Trả lời sai!';
+setTimeout(()=>{if(playing)endGame(reason);},350);
+}
+}
+
+if(!isGuest){
+if(score>data.dailyScoreBest)data.dailyScoreBest=score;
+checkAdmin();checkAchievements();checkDaily2();
+}
+updateHardRecord();saveSoon();
+refreshGameHUD();updateTop();
+
+if(nextAfter){
+updateBossProgress();updateSkills();
+setTimeout(()=>{if(playing){locked=false;newQuestion();startTimer();}},180);
+}
+}
+
+/* ========== KẾT THÚC ========== */
+function endGame(reason){
+if(!playing)return;
+stopTimer();clearEvent();playing=false;locked=true;
+const practice=mode==='practice';
+let adminWon=false;
+if(!practice){
+data.games++;
+data.records[mode]=Math.max(data.records[mode]||0,score);
+if(mode==='hard')data.adminBestHardScore=Math.max(data.adminBestHardScore,score);
+if(!isGuest){
+if(score>data.dailyScoreBest)data.dailyScoreBest=score;
+adminWon=checkAdmin();checkAchievements();checkDaily2();
+}
+save();updateTop();
+}
+$('resultTitle').textContent=reason;
+$('finalScore').textContent=practice?'—':score.toFixed(2);
+$('finalMode').textContent='CHẾ ĐỘ '+modes[mode].label;
+$('finalRight').textContent=rightGame;
+$('finalWrong').textContent=wrongGame;
+const total=rightGame+wrongGame;
+$('finalAccuracy').textContent=(total?Math.round(rightGame/total*100):0)+'%';
+const elapsed=Math.max(0,(Date.now()-gameStartedAt)/1000);
+$('finalAvgTime').textContent=(total?(elapsed/total).toFixed(1):0)+'s';
+$('finalBosses').textContent=matchBossesDefeated;
+$('finalShield').textContent=shieldCount;
+$('newRecord').textContent=!practice&&score>0&&score===data.records[mode]?'🏆 KỶ LỤC TỐT NHẤT!':'';
+$('adminResult').textContent=practice?'📚 Luyện tập: không tính điểm, XP hay kỷ lục.':isGuest?'👤 Khách: dữ liệu được lưu trên thiết bị.':adminWon?'👑 ĐÃ MỞ KHÓA ADMIN! +100.000.000 XU':'';
+show('over');
+}
+
+/* ========== ĐỐI KHÁNG 2 NGƯỜI ========== */
+const duel={on:false,s1:0,s2:0,q:null,lock1:false,lock2:false,resolved:false,timer:0,next:0};
+function duelSetButtons(){
+$('d1yes').disabled=$('d1no').disabled=duel.lock1;
+$('d2yes').disabled=$('d2no').disabled=duel.lock2;
+}
+function duelMsg(p,text,color){
+const el=$('duelMsg'+p);
+el.textContent=text;
+el.style.color=color||'var(--text)';
+}
+function duelStart(){
+stopTimer();playing=false;clearEvent();
+mode='duel';activeBoss=null;
+duel.s1=0;duel.s2=0;duel.on=true;
+$('duelResult').hidden=true;
+setText($('duelS1'),0);setText($('duelS2'),0);
+show('duel');
+duelNext();
+}
+function duelNext(){
+clearTimeout(duel.timer);clearTimeout(duel.next);
+if(!duel.on)return;
+duel.q=makeQuestion();
+duel.lock1=false;duel.lock2=false;duel.resolved=false;
+const q=duel.q;
+const expr=q.custom?q.expression:q.a+' '+q.op+' '+q.b;
+document.querySelectorAll('.dq-expr').forEach(el=>setText(el,expr));
+document.querySelectorAll('.dq-res').forEach(el=>setText(el,q.shown));
+duelMsg(1,'');duelMsg(2,'');
+duelSetButtons();
+const bar=$('duelBar');
+bar.style.transition='none';
+bar.style.transform='scaleX(1)';
+void bar.offsetWidth;
+bar.style.transition='transform '+DUEL_TIME+'s linear';
+bar.style.transform='scaleX(0)';
+duel.timer=setTimeout(()=>{
+if(!duel.on||duel.resolved)return;
+duel.resolved=true;
+duelMsg(1,'⏰ Hết giờ!','var(--muted)');duelMsg(2,'⏰ Hết giờ!','var(--muted)');
+duel.next=setTimeout(duelNext,800);
+},DUEL_TIME*1000);
+}
+function duelAnswer(p,value){
+if(!duel.on||duel.resolved)return;
+if((p===1&&duel.lock1)||(p===2&&duel.lock2))return;
+const correct=value===duel.q.isTrue;
+const other=p===1?2:1;
+if(correct){
+duel.resolved=true;
+clearTimeout(duel.timer);
+if(p===1)duel.s1++;else duel.s2++;
+setText($('duelS1'),duel.s1);setText($('duelS2'),duel.s2);
+sfx('ok');vibe(30);
+duelMsg(p,'✅ +1 điểm!','var(--green)');
+duelMsg(other,'Chậm mất rồi!','var(--muted)');
+if((p===1?duel.s1:duel.s2)>=DUEL_TARGET){duelEnd(p);return;}
+duel.next=setTimeout(duelNext,800);
+}else{
+if(p===1)duel.lock1=true;else duel.lock2=true;
+sfx('bad');vibe(50);
+duelMsg(p,'❌ Sai! Bị khóa câu này','var(--red)');
+duelSetButtons();
+if(duel.lock1&&duel.lock2){
+duel.resolved=true;
+clearTimeout(duel.timer);
+duel.next=setTimeout(duelNext,800);
+}
+}
+}
+function duelEnd(winner){
+duel.on=false;
+clearTimeout(duel.timer);clearTimeout(duel.next);
+$('duelWinner').textContent='🏆 NGƯỜI CHƠI '+winner+' THẮNG!';
+$('duelFinal').textContent='Tỉ số: '+duel.s1+' - '+duel.s2;
+$('duelResult').hidden=false;
+sfx('win');vibe([100,50,100,50,200]);
+}
+function duelLeave(){
+duel.on=false;
+clearTimeout(duel.timer);clearTimeout(duel.next);
+show('home');
+}
+$('d1yes').onclick=()=>duelAnswer(1,true);
+$('d1no').onclick=()=>duelAnswer(1,false);
+$('d2yes').onclick=()=>duelAnswer(2,true);
+$('d2no').onclick=()=>duelAnswer(2,false);
+$('duelQuit').onclick=duelLeave;
+$('duelHome').onclick=duelLeave;
+$('duelAgain').onclick=duelStart;
+$('duelBtn').onclick=duelStart;
+
+/* ========== SAO LƯU ========== */
+function exportCode(){
+flushSave();
+const payload={v:1,t:Date.now(),u:isGuest?'khách':currentUser,d:data};
+return 'HTR1:'+btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+}
+function parseCode(code){
+if(!code.startsWith('HTR1:'))throw Error('Mã không hợp lệ! Mã phải bắt đầu bằng HTR1:');
+let payload;
+try{payload=JSON.parse(decodeURIComponent(escape(atob(code.slice(5)))));}
+catch(e){throw Error('Mã bị lỗi hoặc chưa dán đầy đủ!');}
+if(!payload||!payload.d||typeof payload.d!=='object'||!payload.d.records)throw Error('Mã không chứa dữ liệu game!');
+return payload;
+}
+function renderBackup(){
+$('exportBox').value='';
+$('importBox').value='';
+}
+$('backupBtn').onclick=()=>{renderBackup();show('backup');};
+$('exportBtn').onclick=()=>{
+try{$('exportBox').value=exportCode();toast('✅ Đã tạo mã sao lưu!');}
+catch(e){toast('Không tạo được mã!');}
+};
+$('copyBtn').onclick=async()=>{
+const box=$('exportBox');
+if(!box.value){toast('Hãy bấm "Tạo mã sao lưu" trước!');return;}
+try{await navigator.clipboard.writeText(box.value);toast('📋 Đã sao chép mã!');}
+catch(e){
+box.focus();box.select();
+try{document.execCommand('copy');toast('📋 Đã sao chép mã!');}
+catch(_){toast('Hãy giữ ngón tay vào ô mã rồi chọn Sao chép.');}
+}
+};
+$('importBtn').onclick=()=>{
+const code=$('importBox').value.replace(/\s+/g,'');
+if(!code){toast('Hãy dán mã vào ô nhập!');return;}
+let payload;
+try{payload=parseCode(code);}catch(e){toast(e.message);return;}
+const who=isGuest?'chế độ KHÁCH':'tài khoản "'+currentUser+'"';
+ask('Nhập dữ liệu?','Dữ liệu của '+who+' sẽ bị THAY THẾ bằng dữ liệu từ mã (của '+(payload.u||'?')+'). Không thể hoàn tác.',()=>{
+data=normalizeData(payload.d);
+dataLoaded=true;
+save();updateTop();applyTheme();
+$('importBox').value='';
+toast('✅ Đã khôi phục dữ liệu!');
+});
+};
+
+/* ========== MÀN HÌNH PHỤ ========== */
+function renderStats(){
+const total=data.right+data.wrong;
+$('statGames').textContent=data.games;
+$('statRight').textContent=data.right;
+$('statWrong').textContent=data.wrong;
+$('statAccuracy').textContent=(total?Math.round(data.right/total*100):0)+'%';
+$('statXP').textContent=fmt(data.xp);
+$('statSurvival').textContent=data.records.survival;
+$('statRush').textContent=fmt(data.records.rush||0);
+}
+function renderDaily(){
+resetDaily(data);
+const day=((Math.max(1,data.loginStreak)-1)%7)+1;
+$('loginStreakText').textContent=data.loginStreak+' ngày';
+$('loginGiftText').textContent=isGuest
+?'👤 Khách không nhận quà đăng nhập.'
+:'Hôm nay bạn đã nhận quà ngày '+day+'/7 (+'+fmt(loginGiftFor(day))+' xu). Ngày mai: +'+fmt(loginGiftFor(day%7+1))+' xu'+(day%7+1===7?' (rương lớn!)':'')+'. Bỏ lỡ 1 ngày thì chuỗi quay về ngày 1.';
+$('dailyProgress').style.width=Math.min(100,data.dailyCorrect/20*100)+'%';
+$('dailyProgressText').textContent=Math.min(20,data.dailyCorrect)+' / 20';
+$('dailyStatus').textContent=isGuest?'👤 Khách không nhận thưởng nhiệm vụ.':data.dailyClaimed?'✅ Đã hoàn thành và nhận thưởng hôm nay!':'Còn '+Math.max(0,20-data.dailyCorrect)+' câu đúng để nhận thưởng.';
+const boss=Math.min(1,data.dailyBoss);
+$('dailyBossBar').style.width=(boss*100)+'%';
+$('dailyBossText').textContent=boss+' / 1';
+$('dailyBossStatus').textContent=isGuest?'👤 Khách không nhận thưởng nhiệm vụ.':data.dailyBossClaimed?'✅ Đã nhận rương hôm nay!':'Hãy hạ 1 Boss ở bất kỳ chế độ nào (kể cả Boss Rush).';
+const sc=Math.min(50,data.dailyScoreBest);
+$('dailyScoreBar').style.width=(sc/50*100)+'%';
+$('dailyScoreText').textContent=Math.floor(sc)+' / 50';
+$('dailyScoreStatus').textContent=isGuest?'👤 Khách không nhận thưởng nhiệm vụ.':data.dailyScoreClaimed?'✅ Đã nhận rương hôm nay!':'Đạt 50 điểm trong một trận bất kỳ.';
+$('dailyStreakBig').textContent=data.dailyStreak+' ngày';
+}
+function escapeHTML(s){
+return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function renderLeaderboard(){
+const accounts=getAccounts(),rows=[];
+for(const name of Object.keys(accounts)){
+try{
+const d=JSON.parse(localStorage.getItem(DATA_PREFIX+name));
+if(d)rows.push({name,score:Number(d.adminBestHardScore||(d.records&&d.records.hard)||0),xp:Number(d.xp||0)});
+}catch(e){}
+}
+rows.sort((a,b)=>b.score-a.score||b.xp-a.xp);
+$('leaderboardList').innerHTML=rows.length
+?rows.slice(0,10).map((r,i)=>`<div class="rank-item"><div class="rank-number">${i+1}</div><div class="rank-name"><b>${escapeHTML(r.name)}</b><small>${fmt(r.xp)} XP</small></div><b>${fmt(r.score)} điểm</b></div>`).join('')
+:'<p class="sub">Chưa có tài khoản nào trong bảng xếp hạng.</p>';
+$('myHardRecord').textContent=fmt(data.adminBestHardScore);
+$('myXP').textContent=fmt(data.xp);
+$('myCoins').textContent=fmt(data.coins);
+}
+function renderAccount(){
+$('accountGuest').hidden=!isGuest;
+$('accountInfo').hidden=isGuest;
+if(isGuest)return;
+const acc=getAccounts()[currentUser];
+$('accUser').textContent=currentUser;
+const pw=acc&&acc.p;
+if(pw){
+$('accPass').textContent=passVisible?pw:'•'.repeat(Math.min(pw.length,12));
+$('togglePass').hidden=false;
+$('accNote').textContent='';
+}else{
+$('accPass').textContent='(chưa lưu)';
+$('togglePass').hidden=true;
+$('accNote').textContent='Đây là tài khoản cũ. Hãy đăng xuất rồi đăng nhập lại một lần để mật khẩu hiện ở đây.';
+}
+}
+$('togglePass').onclick=()=>{passVisible=!passVisible;renderAccount();};
+
+function renderAdmin(){
+$('adminLocked').hidden=data.adminUnlocked;
+$('adminControls').hidden=!data.adminUnlocked;
+if(!data.adminUnlocked)return;
+$('editCoins').value=data.coins;
+$('editXP').value=data.xp;
+$('editRight').value=data.right;
+$('editWrong').value=data.wrong;
+$('editGames').value=data.games;
+$('editEasy').value=data.records.easy;
+$('editMedium').value=data.records.medium;
+$('editHard').value=data.records.hard;
+$('editSurvival').value=data.records.survival;
+$('editRush').value=data.records.rush||0;
+}
+function renderEquipment(){
+$('equipmentShop').innerHTML=equipmentItems.map(item=>{
+const owned=hasEquipment(item.id);
+const using=data.equipment[item.slot]===item.id;
+return `<div class="shop-item"><div><b>${item.icon} ${item.name}</b><small>${item.description}</small><small>${owned?'Đã sở hữu':fmt(item.price)+' xu'}</small></div><button data-buy-equipment="${item.id}">${using?'Đang dùng':owned?'Trang bị':'Mua'}</button></div>`;
+}).join('');
+$('equipmentCurrent').innerHTML=equipmentItems.map(item=>{
+const using=data.equipment[item.slot]===item.id;
+return `<div class="shop-item"><div><b>${item.icon} ${item.name}</b><small>${using?'Đang trang bị':'Chưa trang bị'}</small></div><button data-remove-equipment="${item.id}" ${using?'':'disabled'}>Tháo</button></div>`;
+}).join('');
+}
+function renderSkillTree(){
+$('skillTreeList').innerHTML=skillTreeItems.map(it=>{
+let status,btn;
+if(it.type==='unlock'){
+const owned=!!data.skills[it.id];
+status=owned?'Đã mở khóa':fmt(it.price)+' xu';
+btn=`<button data-skill="${it.id}" ${owned?'disabled':''}>${owned?'Đã có':'Mở khóa'}</button>`;
+}else{
+const lvl=data.skills[it.id]||0,max=it.prices.length;
+status='Cấp '+lvl+' / '+max+(lvl<max?' · Nâng cấp: '+fmt(it.prices[lvl])+' xu':' · Tối đa');
+btn=`<button data-skill="${it.id}" ${lvl>=max?'disabled':''}>${lvl>=max?'Tối đa':'Nâng cấp'}</button>`;
+}
+return `<div class="shop-item"><div><b>${it.name}</b><small>${it.desc}</small><small>${status}</small></div>${btn}</div>`;
+}).join('');
+}
+function buySkill(id){
+if(isGuest){toast('Khách không thể mua kỹ năng!');return;}
+const it=skillTreeItems.find(x=>x.id===id);
+if(!it)return;
+let price;
+if(it.type==='unlock'){
+if(data.skills[id]){toast('Bạn đã mở khóa rồi!');return;}
+price=it.price;
+}else{
+const lvl=data.skills[id]||0;
+if(lvl>=it.prices.length){toast('Đã đạt cấp tối đa!');return;}
+price=it.prices[lvl];
+}
+if(data.coins<price){toast('Bạn chưa đủ xu!');return;}
+data.coins-=price;
+if(it.type==='unlock')data.skills[id]=true;
+else data.skills[id]=(data.skills[id]||0)+1;
+save();updateTop();renderRPG('skills');
+toast('🌳 Đã nâng cấp: '+it.name);
+}
+const RPG_TABS=['profile','account','skills','shop','equipment','chests','bosses','achievements','admin'];
+function renderRPG(tab='profile'){
+document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+RPG_TABS.forEach(n=>$(n+'Page').hidden=n!==tab);
+const levelInfo=getLevelInfo(data.xp),level=levelInfo.level;
+$('rpgLevel').textContent='CẤP '+level;
+$('levelRankDisplay').textContent='🏅 '+getLevelRank(level);
+$('titleDisplay').textContent='Danh hiệu trang bị: '+data.title;
+$('avatarDisplay').textContent=data.avatar;
+$('xpText').textContent=levelInfo.max?'MAX LEVEL':fmt(levelInfo.currentXP)+' / '+fmt(levelInfo.requiredXP)+' XP';
+$('xpBar').style.width=levelInfo.progress+'%';
+$('nextLevelText').textContent=levelInfo.max?'🏆 Bạn đã đạt cấp độ tối đa!':'Còn '+fmt(levelInfo.requiredXP-levelInfo.currentXP)+' XP để lên cấp '+(level+1);
+$('rpgCoins').textContent=fmt(data.coins);
+$('dailyText').textContent=Math.min(20,data.dailyCorrect)+' / 20';
+$('dailyStreak').textContent=data.dailyStreak+' ngày';
+$('loginStreakProfile').textContent=data.loginStreak+' ngày';
+$('bossesDefeated').textContent=data.bossesDefeated;
+$('chestsOpened').textContent=data.chestsOpened;
+$('equippedCount').textContent=Object.values(data.equipment).filter(Boolean).length+' / 5';
+$('titleList').innerHTML=titleOptions.map(t=>{
+const unlocked=level>=t.level||data.ownedTitles.includes(t.title);
+return `<div class="shop-item"><div><b>${unlocked?'🏅':'🔒'} ${t.title}</b><small>${unlocked?'Đã mở khóa':'Mở ở cấp '+t.level}</small></div><button data-title="${t.title}" ${unlocked?'':'disabled'}>${data.title===t.title?'Đang dùng':'Trang bị'}</button></div>`;
+}).join('');
+$('shopList').innerHTML=Object.entries(themes).map(([id,t])=>{
+const owned=data.ownedThemes.includes(id),using=data.theme===id;
+return `<div class="shop-item"><div><b>${t.icon} ${t.name}</b><small>${using?'Đang sử dụng':owned?'Đã sở hữu':t.price+' xu'}</small></div><button data-theme="${id}">${using?'Đang dùng':owned?'Trang bị':'Mua'}</button></div>`;
+}).join('');
+$('avatarList').innerHTML=avatarOptions.map(a=>{
+const owned=data.ownedAvatars.includes(a.icon);
+return `<div class="shop-item"><div><b>${a.icon} Avatar</b><small>${owned?'Đã sở hữu':a.price+' xu'}</small></div><button data-avatar="${a.icon}">${data.avatar===a.icon?'Đang dùng':owned?'Trang bị':'Mua'}</button></div>`;
+}).join('');
+const chests=[
+{id:'normal',name:'Rương thường',icon:'📦',price:100},
+{id:'rare',name:'Rương hiếm',icon:'🎁',price:500},
+{id:'epic',name:'Rương sử thi',icon:'💎',price:2000},
+{id:'legend',name:'Rương huyền thoại',icon:'👑',price:10000}
+];
+$('chestList').innerHTML=chests.map(c=>`<div class="chest"><div style="font-size:32px">${c.icon}</div><strong>${c.name}</strong><small>Giá ${fmt(c.price)} xu</small><button class="btn gold" data-chest="${c.id}">Mở rương</button></div>`).join('');
+$('bossList').innerHTML=bossTypes.map((b,i)=>{
+const defeated=data.bossesDefeated>i;
+return `<div class="boss-card"><b>${b.icon} ${b.name}</b><div class="sub">Mốc ${b.need} câu đúng · ${fmt(b.hp)} HP · Thưởng ${fmt(b.reward)} xu</div><div class="sub">⚠️ ${b.skill.text}</div><div class="boss-health"><i style="transform:scaleX(${defeated?0:1})"></i></div><small>${defeated?'Đã hạ gục':'Chưa chinh phục'}</small></div>`;
+}).join('');
+$('achievementList').innerHTML=achievements.map(([id,title,desc])=>{
+const unlocked=data.achievements.includes(id);
+return `<div class="achievement"><div><b>${unlocked?'🏅':'🔒'} ${title}</b><small>${desc}</small></div><b>${unlocked?'ĐÃ MỞ':'CHƯA MỞ'}</b></div>`;
+}).join('');
+renderEquipment();
+renderSkillTree();
+if(tab==='account'){passVisible=false;renderAccount();}
+if(tab==='admin')renderAdmin();
+}
+
+/* ========== ADMIN ========== */
+function numberValue(id){
+const n=Number($(id).value);
+if(!Number.isSafeInteger(n)||n<0)throw Error('Giá trị không hợp lệ!');
+return n;
+}
+function saveAdmin(){
+if(!data.adminUnlocked||isGuest)return;
+try{
+const v={
+coins:numberValue('editCoins'),xp:numberValue('editXP'),right:numberValue('editRight'),
+wrong:numberValue('editWrong'),games:numberValue('editGames'),
+easy:numberValue('editEasy'),medium:numberValue('editMedium'),
+hard:numberValue('editHard'),survival:numberValue('editSurvival'),
+rush:numberValue('editRush')
+};
+data.coins=v.coins;data.xp=v.xp;data.right=v.right;data.wrong=v.wrong;data.games=v.games;
+data.records.easy=v.easy;data.records.medium=v.medium;
+data.records.hard=v.hard;data.records.survival=v.survival;data.records.rush=v.rush;
+data.adminBestHardScore=Math.max(data.adminBestHardScore,data.records.hard);
+save();updateTop();renderAdmin();toast('Đã lưu ADMIN!');
+}catch(e){toast(e.message);}
+}
+function maxAdmin(){
+if(!data.adminUnlocked||isGuest)return;
+data.coins=1000000000;data.xp=100000000;
+data.right=100000000;data.wrong=0;data.games=1000000;
+for(const k in data.records)data.records[k]=100000000;
+data.adminBestHardScore=100000000;
+data.skills={hint:true,burst:true,energy:3,shield:2};
+save();updateTop();renderAdmin();toast('⚡ MAX toàn bộ chỉ số!');
+}
+
+/* ========== RƯƠNG / TRANG BỊ ========== */
+function openChest(id){
+if(isGuest){toast('Khách không thể mở rương!');return;}
+const prices={normal:100,rare:500,epic:2000,legend:10000};
+const ranges={normal:[30,150],rare:[150,700],epic:[700,2500],legend:[3000,15000]};
+const price=prices[id],range=ranges[id];
+if(!price||data.coins<price){toast('Bạn chưa đủ xu!');return;}
+data.coins-=price;
+let reward=range[0]+rand(range[1]-range[0]+1),bonus='';
+if(Math.random()<.12){reward*=2;bonus=' 🎉 NHÂN ĐÔI PHẦN THƯỞNG!';}
+data.coins+=reward;data.chestsOpened++;
+checkAchievements();save();updateTop();renderRPG('chests');
+toast('🎁 Nhận '+fmt(reward)+' xu!'+bonus);
+}
+function buyEquipment(id){
+if(isGuest){toast('Khách không thể mua hoặc lưu trang bị!');return;}
+const item=getEquipment(id);
+if(!item)return;
+if(!hasEquipment(id)){
+if(data.coins<item.price){toast('Bạn chưa đủ xu!');return;}
+data.coins-=item.price;
+data.ownedEquipment.push(id);
+}
+data.equipment[item.slot]=id;
+save();updateTop();renderRPG('equipment');
+toast('Đã trang bị '+item.name+'!');
+}
+function removeEquipment(id){
+const item=getEquipment(id);
+if(!item)return;
+if(data.equipment[item.slot]===id)data.equipment[item.slot]=null;
+save();renderRPG('equipment');toast('Đã tháo '+item.name);
+}
+function resetData(){
+stopTimer();clearEvent();
+data=defaults();score=0;rightGame=0;wrongGame=0;levelGame=1;
+save();updateTop();applyTheme();toast('Đã đặt lại dữ liệu!');
+}
+
+/* ========== SỰ KIỆN GIAO DIỆN ========== */
+$('soundBtn').onclick=()=>{
+sfxOn=!sfxOn;saveSettings();renderSettings();
+if(sfxOn){unlockAudio();sfx('ok');}
+};
+$('vibeBtn').onclick=()=>{
+vibeOn=!vibeOn;saveSettings();renderSettings();
+vibe(80);
+};
+$('logoutBtn').onclick=()=>{
+if(playing){toast('Hãy kết thúc trận trước khi đăng xuất!');return;}
+ask('Đăng xuất?','Bạn sẽ trở về màn hình đăng nhập.',()=>{
+flushSave();dataLoaded=false;
+localStorage.removeItem(SESSION_KEY);
+currentUser=null;isGuest=true;data=defaults();
+applyTheme();show('auth');backAuth();updateTop();
+});
+};
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>startGame(b.dataset.mode));
+$('practiceBtn').onclick=()=>startGame('practice');
+$('yesBtn').onclick=()=>answer(true);
+$('noBtn').onclick=()=>answer(false);
+$('statsBtn').onclick=()=>{renderStats();show('stats');};
+$('rpgBtn').onclick=()=>{renderRPG('profile');show('rpg');};
+$('skillTreeBtn').onclick=()=>{renderRPG('skills');show('rpg');};
+$('leaderboardBtn').onclick=()=>{renderLeaderboard();show('leaderboard');};
+$('dailyBtn').onclick=()=>{renderDaily();show('daily');};
+document.querySelectorAll('[data-home]').forEach(b=>b.onclick=()=>show('home'));
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>renderRPG(b.dataset.tab));
+$('quitBtn').onclick=()=>{
+if(!playing)return;
+if(mode==='practice')endGame('Kết thúc luyện tập');
+else ask('Thoát trận?','Trận đấu sẽ kết thúc.',()=>endGame('Bạn đã thoát trận.'));
+};
+$('againBtn').onclick=()=>startGame(mode);
+$('homeBtn').onclick=()=>show('home');
+$('resetBtn').onclick=()=>ask('Đặt lại dữ liệu?','Toàn bộ dữ liệu của phiên hiện tại sẽ bị xóa.',resetData);
+$('saveAdmin').onclick=saveAdmin;
+$('maxAdmin').onclick=maxAdmin;
+$('modalYes').onclick=()=>{
+const fn=modalAction;
+$('modal').classList.remove('show');modalAction=null;
+if(fn)fn();
+};
+$('modalNo').onclick=()=>{$('modal').classList.remove('show');modalAction=null;};
+
+$('adminAccessBtn').onclick=()=>{
+if(isGuest){toast('Bạn cần đăng nhập tài khoản để sử dụng Admin!');return;}
+if(data.adminUnlocked){renderRPG('admin');show('rpg');return;}
+$('adminPasswordInput').value='';
+$('adminPasswordModal').classList.add('show');
+$('adminPasswordInput').focus();
+};
+$('confirmAdminPassword').onclick=()=>{
+if($('adminPasswordInput').value!==ADMIN_PASSWORD){
+toast('❌ Mật khẩu Admin không chính xác!');
+$('adminPasswordInput').value='';return;
+}
+data.adminUnlocked=true;data.adminRewardClaimed=true;
+save();updateTop();
+$('adminPasswordModal').classList.remove('show');
+toast('👑 KÍCH HOẠT QUYỀN ADMIN THÀNH CÔNG!');
+renderRPG('admin');show('rpg');
+};
+$('cancelAdminPassword').onclick=()=>$('adminPasswordModal').classList.remove('show');
+$('adminPasswordInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('confirmAdminPassword').click();});
+
+$('shopList').onclick=e=>{
+const b=e.target.closest('[data-theme]');
+if(!b)return;
+if(isGuest){toast('Khách không thể mua hoặc lưu vật phẩm!');return;}
+const id=b.dataset.theme,t=themes[id];
+if(data.ownedThemes.includes(id))data.theme=id;
+else if(data.coins>=t.price){data.coins-=t.price;data.ownedThemes.push(id);data.theme=id;}
+else{toast('Bạn chưa đủ xu!');return;}
+save();applyTheme();updateTop();renderRPG('shop');
+};
+$('avatarList').onclick=e=>{
+const b=e.target.closest('[data-avatar]');
+if(!b)return;
+if(isGuest){toast('Khách không thể mua vật phẩm!');return;}
+const icon=b.dataset.avatar,a=avatarOptions.find(x=>x.icon===icon);
+if(data.ownedAvatars.includes(icon))data.avatar=icon;
+else if(a&&data.coins>=a.price){data.coins-=a.price;data.ownedAvatars.push(icon);data.avatar=icon;}
+else{toast('Bạn chưa đủ xu!');return;}
+save();updateTop();renderRPG('shop');
+};
+$('titleList').onclick=e=>{
+const b=e.target.closest('[data-title]');
+if(!b)return;
+const title=b.dataset.title,t=titleOptions.find(x=>x.title===title);
+if(!t||getLevelInfo(data.xp).level<t.level){toast('Chưa đủ cấp độ!');return;}
+data.ownedTitles=[...new Set([...data.ownedTitles,title])];
+data.title=title;save();renderRPG('profile');
+};
+$('chestList').onclick=e=>{const b=e.target.closest('[data-chest]');if(b)openChest(b.dataset.chest);};
+$('equipmentShop').onclick=e=>{const b=e.target.closest('[data-buy-equipment]');if(b)buyEquipment(b.dataset.buyEquipment);};
+$('equipmentCurrent').onclick=e=>{const b=e.target.closest('[data-remove-equipment]');if(b)removeEquipment(b.dataset.removeEquipment);};
+$('skillTreeList').onclick=e=>{const b=e.target.closest('[data-skill]');if(b)buySkill(b.dataset.skill);};
+
+$('skillReroll').onclick=()=>useSkill('reroll');
+$('skillCritical').onclick=()=>useSkill('critical');
+$('skillShield').onclick=()=>useSkill('shield');
+$('skillSkip').onclick=()=>useSkill('skip');
+$('skillHint').onclick=()=>useSkill('hint');
+$('skillBurst').onclick=()=>useSkill('burst');
+
+document.addEventListener('keydown',e=>{
+const k=e.key.toLowerCase();
+if(duel.on){
+if(k==='a')duelAnswer(1,true);
+if(k==='s')duelAnswer(1,false);
+if(k==='k')duelAnswer(2,true);
+if(k==='l')duelAnswer(2,false);
+return;
+}
+if(!playing)return;
+if(mode==='practice'&&!$('nextBtn').hidden&&(e.key==='Enter'||e.key===' ')){
+e.preventDefault();$('nextBtn').click();return;
+}
+if(e.key==='ArrowLeft'||k==='a')answer(true);
+if(e.key==='ArrowRight'||k==='d')answer(false);
+});
+
+/* ========== KHỞI ĐỘNG ========== */
+loadSettings();
+renderSettings();
+data=defaults();
+updateTop();
+applyTheme();
+show('auth');
+backAuth();
+restoreSession();
+</script>
+</body>
+</html>
